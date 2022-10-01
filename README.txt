@@ -1,3 +1,5 @@
+You can download via the Releases page.
+
 You have to manually enable the unrestricted scripts to run the debloater (until I do a proper bat file which does so).
 
 To do so, open PowerShell as administrator and run:
