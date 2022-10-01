@@ -100,6 +100,9 @@ $AppXApps = @(
         "*WinZipUniversal*"
         "*Wunderlist*"
         "*XING*"
+        "*Messenger*"
+        "*Instagram*"
+        "*TikTok*"
 
         # Apps which other apps depend on
         "Microsoft.Advertising.Xaml"
@@ -140,6 +143,7 @@ $AppXApps = @(
 
         "*Netflix*"                        # Netflix
         "*SpotifyMusic*"                   # Spotify
+        "*Spotify*"                        #seems SpotifyMusic does not actually remove Spotify
 
         # [DIY] Can't be reinstalled
 
