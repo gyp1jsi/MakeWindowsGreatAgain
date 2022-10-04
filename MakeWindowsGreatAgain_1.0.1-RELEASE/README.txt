@@ -10,8 +10,4 @@ then cd to the script location and run
 
 It will open the script and start doing its stuff.
 
-If you can, record the screen via OBS and send it as issue so I can see what does the script actually do.
-
-IMPORTANT: RUN IN A VIRTUAL MACHINE UNTIL THE FINAL VERSION RELEASES! I AM NOT SURE IF THIS SCRIPT IS WORKING CORRECTLY UNTIL I GET YOUR FEEDBACK!
-
 -gypijsi
