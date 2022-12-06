@@ -539,7 +539,7 @@ function Optimize-ServicesRunning() {
     )
 
     $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
-    $EnableServicesOnSSD = @("SysMain", "WSearch")
+    $EnableServicesOnSSD = @("SysMain")
 
     # Services which will be totally disabled
     $ServicesToDisabled = @(
