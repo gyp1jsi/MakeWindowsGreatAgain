@@ -1,15 +1,29 @@
-You can download via the Releases page.
+ 	  ▄██████▄  ▄██   ▄      ▄███████▄  ▄█       ▄█    ▄████████  ▄█  
+ 	 ███    ███ ███   ██▄   ███    ███ ███      ███   ███    ███ ███  
+ 	 ███    █▀  ███▄▄▄███   ███    ███ ███▌     ███   ███    █▀  ███▌ 
+ 	▄███        ▀▀▀▀▀▀███   ███    ███ ███▌     ███   ███        ███▌ 
+	▀▀███ ████▄  ▄██   ███ ▀█████████▀  ███▌     ███ ▀███████████ ███▌ 
+ 	 ███    ███ ███   ███   ███        ███      ███          ███ ███  
+ 	 ███    ███ ███   ███   ███        ███      ███    ▄█    ███ ███  
+ 	 ████████▀   ▀█████▀   ▄████▀      █▀   █▄ ▄███  ▄████████▀  █▀   
+                                         ▀▀▀▀▀▀                  
 
-You have to manually enable the unrestricted scripts to run the debloater (until I do a proper bat file which does so).
+		        - MakeWindowsGreatAgain.1_0_2.PROPER-GYPIJSI - 	  
 
-To do so, open PowerShell as administrator and run:
+		           You can download via the Releases page.
 
-Set-ExecutionPolicy unrestricted
+	     You have to manually enable the unrestricted scripts to 
 
-then cd to the script location and run
+    run the debloater (until I do a proper bat file which does so).
 
-.\main.ps1
+	       To do so, open PowerShell as administrator and run:
 
-It will open the script and start doing its stuff.
+		             Set-ExecutionPolicy unrestricted
 
--gypijsi
+	            then cd to the script location and run
+
+				                    .\main.ps1
+
+	     It will open the script and start doing its stuff.
+
+			 	                     -gypijsi
