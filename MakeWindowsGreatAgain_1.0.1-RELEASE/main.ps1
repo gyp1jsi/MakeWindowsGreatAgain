@@ -1,6 +1,6 @@
 # Start of the script
-# Rewriting this because the script has been lost when it was almost finished
-# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and <insert tester name> for testing
+# Rewriting this because the script has been lost when it was almost finished :P
+# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and DarkJoker360, CamiciaNera, Twoholdem, MastroAlberto for testing
 
 #Removes bloatware apps
 $AppXApps = @(
@@ -53,6 +53,7 @@ $AppXApps = @(
         "Clipchamp.Clipchamp"				     # Clipchamp – Video Editor
         "MicrosoftWindows.Client.WebExperience"  # Taskbar Widgets
         "MicrosoftTeams"                         # Microsoft Teams / Preview
+        "*Teams*"                                # Chat
 
         # 3rd party Apps
         "*ACGMediaPlayer*"
@@ -102,7 +103,8 @@ $AppXApps = @(
         "*XING*"
         "*Messenger*"
         "*Instagram*"
-        "*TikTok*"
+        "*Facebook.InstagramBeta*"
+        "*BytedancePte.Ltd.TikTok*"
         "*PrimeVideo*"
         "*AmazonVideo.PrimeVideo*"              #If the above does not work
         "*Disney*"
@@ -147,7 +149,8 @@ $AppXApps = @(
 
         "*Netflix*"                        # Netflix
         "*SpotifyMusic*"                   # Spotify
-        "*Spotify*"                        #seems SpotifyMusic does not actually remove Spotify
+        "*Spotify*"
+        "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work
 
         # [DIY] Can't be reinstalled
 
@@ -559,7 +562,7 @@ function Optimize-ServicesRunning() {
         "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
         "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
-        "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs)
+        "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -606,7 +609,7 @@ function Optimize-ServicesRunning() {
         #"PrintNotify"                   # DEFAULT: Manual    | WARNING! REMOVING WILL TURN PRINTING LESS MANAGEABLE | Printer Extensions and Notifications
         #"Spooler"                       # DEFAULT: Automatic | WARNING! REMOVING WILL DISABLE PRINTING              | Print Spooler
         # - Wi-Fi services
-        #"WlanSvc"                       # DEFAULT: Manual (No Wi-Fi devices) / Automatic (Wi-Fi devices) | WARNING! REMOVING WILL DISABLE WI-FI | WLAN AutoConfig
+        #"WlanSvc"                       # DEFAULT: Manual (No Wi-Fi devices) / Automatic (Wi-Fi devices) | WARNING! REMOVING WILL DISABLE WI-FI, DON'T TELL ME I DIDN'T WARN YOU, LITTLE PP BITCHES | WLAN AutoConfig
         # - 3rd Party Services
         "gupdate"                        # DEFAULT: Automatic | Google Update Service
         "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
@@ -743,4 +746,5 @@ Write-Host "Disabling Cortana"
 	}
 	Set-ItemProperty $Cortana3 HarvestContacts -Value 0
 
-#End of the script
+# End of the script
+# Damn, if this was hard for me (and I only did copy-paste), I must start learning how to code.
