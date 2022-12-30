@@ -18,7 +18,7 @@
 
 	     To do so, open PowerShell as administrator and run:
 
-		      Set-ExecutionPolicy unrestricted
+       Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 	           then cd to the script location and run
 
