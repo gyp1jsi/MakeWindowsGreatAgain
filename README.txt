@@ -1,19 +1,12 @@
-		 - MakeWindowsGreatAgain.1_0_3.PROPER-GYPIJSI - 	  
+		 - MakeWindowsGreatAgain.1_0_4.PROPER-GYPIJSI - 	  
 
 		     You can download via the Releases page.
 
-	    You have to manually enable the unrestricted scripts to 
+     With version 1.0.4, the script can now be simply launched by running
 
-     	run the debloater (until I do a proper bat file which does so).
+			     RUN ME AS ADMIN.bat
 
-	     To do so, open PowerShell as administrator and run:
-
-       Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-
-	           then cd to the script location and run
-
-				.\main.ps1
-
-	     It will open the script and start doing its stuff.
+	     		As administrator, obviously.
 
 			 	 -gypijsi
+
