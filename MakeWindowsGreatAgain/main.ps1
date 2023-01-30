@@ -180,7 +180,7 @@ $AppXApps = @(
 $Build = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
 
 if ($Build -gt 21996) {
-  Write.Host "You are running Windows 11, the bloat apps will be removed from the start menu. Unfortunately the placeholders can't be removed automatically."
+  Write-Host "You are running Windows 11, the bloat apps will be removed from the start menu. Unfortunately the placeholders can't be removed automatically."
   Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage
 }
 else {
