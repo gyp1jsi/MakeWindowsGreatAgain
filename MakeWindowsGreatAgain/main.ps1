@@ -177,8 +177,15 @@ $AppXApps = @(
     Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
     Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
 
-#Rebuilds the start menu layout using a custom XML file, removing non-installed bloat apps (such as Instagram, Spotify, Tik Tok)
-# https://superuser.com/a/1442733
+$Build = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
+
+if ($Build -gt 21996) {
+  Write.Host "You are running Windows 11, the bloat apps will be removed from the start menu. Unfortunately the placeholders can't be removed automatically."
+  Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage
+}
+else {
+  Write-Host "You are running Windows 10, the Start Menu will be reset using an XML file"
+  # https://superuser.com/a/1442733
 #Requires -RunAsAdministrator
 
 $START_MENU_LAYOUT = @"
@@ -236,6 +243,9 @@ Stop-Process -name explorer
 Import-StartLayout -LayoutPath $layoutFile -MountPath $env:SystemDrive\
 
 Remove-Item $layoutFile
+}
+
+
 
 #Optimizes privacy settings
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
