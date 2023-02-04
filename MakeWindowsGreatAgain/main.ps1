@@ -182,6 +182,7 @@ $buildNumber = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
 
 if ($buildNumber -lt 21996) {
     echo 'You are running Windows 10, the Start Menu layout will be reset'
+    timeout /t 2
     $START_MENU_LAYOUT = @"
     <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
         <LayoutOptions StartTileGroupCellWidth="6" />
@@ -239,6 +240,7 @@ if ($buildNumber -lt 21996) {
 }
 if ($buildNumber -gt 21996) {
     echo 'You are running Windows 11, a Start Menu reset will be attempted'
+    timeout /t 2
     Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage 
 }
 
