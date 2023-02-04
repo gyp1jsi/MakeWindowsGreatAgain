@@ -48,8 +48,8 @@ $AppXApps = @(
         "Microsoft.YourPhone"                    # Your Phone
         "Microsoft.ZuneMusic"                    # Groove Music / (New) Windows Media Player
         "Microsoft.ZuneVideo"                    # Movies & TV
-	    "Microsoft.GamingApp"			         # Xbox App
-	    "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
+	"Microsoft.GamingApp"			 # Xbox App
+	"MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
         "*Microsoft.XboxGamingOverlay*"          # Discord is better
 
         # Default Windows 11 apps
