@@ -821,4 +821,6 @@ Write-Host "Disabling Cortana"
 	Set-ItemProperty $Cortana3 HarvestContacts -Value 0
 
 # End of the script
+echo 'End of the script'
 # Damn, if this was hard for me (and I only did copy-paste), I must start learning how to code.
+timeout /t 5
