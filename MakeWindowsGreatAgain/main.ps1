@@ -50,6 +50,7 @@ $AppXApps = @(
         "Microsoft.ZuneVideo"                    # Movies & TV
 	    "Microsoft.GamingApp"			         # Xbox App
 	    "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
+        "*Microsoft.XboxGamingOverlay*"          # Discord is better
 
         # Default Windows 11 apps
         "Clipchamp.Clipchamp"		     	     # Clipchamp (Shitty Video Editor)
@@ -172,77 +173,73 @@ $AppXApps = @(
     
     #Removes AppxPackages
     #Credit to /u/GavinEke for a modified version of my whitelist code
-    [regex]$WhitelistedApps = '|Microsoft.WindowsCalculator|Microsoft.WindowsStore|Microsoft.Windows.Photos|CanonicalGroupLimited.UbuntuonWindows|Microsoft.XboxGameCallableUI|Microsoft.XboxGamingOverlay|Microsoft.Xbox.TCUI|Microsoft.XboxGamingOverlay|Microsoft.XboxIdentityProvider|Microsoft.MSPaint*'
+    [regex]$WhitelistedApps = '|Microsoft.WindowsCalculator|Microsoft.WindowsStore|Microsoft.Windows.Photos|CanonicalGroupLimited.UbuntuonWindows|Microsoft.XboxGameCallableUI|Microsoft.Xbox.TCUI|Microsoft.XboxIdentityProvider|Microsoft.MSPaint*'
     Get-AppxPackage -AllUsers | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
     Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
     Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
 
-$Build = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
+$buildNumber = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
 
-if ($Build -gt 21996) {
-  Write-Host "You are running Windows 11, the bloat apps will be removed from the start menu. Unfortunately the placeholders can't be removed automatically."
-  Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage
-}
-else {
-  Write-Host "You are running Windows 10, the Start Menu will be reset using an XML file"
-  # https://superuser.com/a/1442733
-#Requires -RunAsAdministrator
-
-$START_MENU_LAYOUT = @"
-<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
-    <LayoutOptions StartTileGroupCellWidth="6" />
-    <DefaultLayoutOverride>
-        <StartLayoutCollection>
-            <defaultlayout:StartLayout GroupCellWidth="6" />
-        </StartLayoutCollection>
-    </DefaultLayoutOverride>
-</LayoutModificationTemplate>
+if ($buildNumber -lt 21996) {
+    echo 'You are running Windows 10, the Start Menu layout will be reset'
+    $START_MENU_LAYOUT = @"
+    <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
+        <LayoutOptions StartTileGroupCellWidth="6" />
+        <DefaultLayoutOverride>
+            <StartLayoutCollection>
+                <defaultlayout:StartLayout GroupCellWidth="6" />
+            </StartLayoutCollection>
+        </DefaultLayoutOverride>
+    </LayoutModificationTemplate>
 "@
 
-$layoutFile="C:\Windows\StartMenuLayout.xml"
+    $layoutFile="C:\Windows\StartMenuLayout.xml"
 
-#Delete layout file if it already exists
-If(Test-Path $layoutFile)
-{
+    #Delete layout file if it already exists
+    If(Test-Path $layoutFile) {
+        Remove-Item $layoutFile
+    }
+
+    #Creates the blank layout file
+    $START_MENU_LAYOUT | Out-File $layoutFile -Encoding ASCII
+
+    $regAliases = @("HKLM", "HKCU")
+
+    #Assign the start layout and force it to apply with "LockedStartLayout" at both the machine and user level
+    foreach ($regAlias in $regAliases) {
+        $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
+        $keyPath = $basePath + "\Explorer" 
+        IF(!(Test-Path -Path $keyPath)) { 
+            New-Item -Path $basePath -Name "Explorer"
+        }
+        Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 1
+        Set-ItemProperty -Path $keyPath -Name "StartLayoutFile" -Value $layoutFile
+    }
+
+    #Restart Explorer, open the start menu (necessary to load the new layout), and give it a few seconds to process
+    Stop-Process -name explorer
+    Start-Sleep -s 5
+    $wshell = New-Object -ComObject wscript.shell; $wshell.SendKeys('^{ESCAPE}')
+    Start-Sleep -s 5
+
+    #Enable the ability to pin items again by disabling "LockedStartLayout"
+    foreach ($regAlias in $regAliases) {
+        $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
+        $keyPath = $basePath + "\Explorer" 
+        Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 0
+    }
+
+    #Restart Explorer and delete the layout file
+    Stop-Process -name explorer
+
+    # Uncomment the next line to make clean start menu default for all new users
+    Import-StartLayout -LayoutPath $layoutFile -MountPath $env:SystemDrive\
+
     Remove-Item $layoutFile
 }
-
-#Creates the blank layout file
-$START_MENU_LAYOUT | Out-File $layoutFile -Encoding ASCII
-
-$regAliases = @("HKLM", "HKCU")
-
-#Assign the start layout and force it to apply with "LockedStartLayout" at both the machine and user level
-foreach ($regAlias in $regAliases){
-    $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
-    $keyPath = $basePath + "\Explorer" 
-    IF(!(Test-Path -Path $keyPath)) { 
-        New-Item -Path $basePath -Name "Explorer"
-    }
-    Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 1
-    Set-ItemProperty -Path $keyPath -Name "StartLayoutFile" -Value $layoutFile
-}
-
-#Restart Explorer, open the start menu (necessary to load the new layout), and give it a few seconds to process
-Stop-Process -name explorer
-Start-Sleep -s 5
-$wshell = New-Object -ComObject wscript.shell; $wshell.SendKeys('^{ESCAPE}')
-Start-Sleep -s 5
-
-#Enable the ability to pin items again by disabling "LockedStartLayout"
-foreach ($regAlias in $regAliases){
-    $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
-    $keyPath = $basePath + "\Explorer" 
-    Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 0
-}
-
-#Restart Explorer and delete the layout file
-Stop-Process -name explorer
-
-# Uncomment the next line to make clean start menu default for all new users
-Import-StartLayout -LayoutPath $layoutFile -MountPath $env:SystemDrive\
-
-Remove-Item $layoutFile
+if ($buildNumber -gt 21996) {
+    echo 'You are running Windows 11, a Start Menu reset will be attempted'
+    Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage 
 }
 
 
@@ -821,6 +818,6 @@ Write-Host "Disabling Cortana"
 	Set-ItemProperty $Cortana3 HarvestContacts -Value 0
 
 # End of the script
-echo 'End of the script'
+Write-Output 'End of the script'
 # Damn, if this was hard for me (and I only did copy-paste), I must start learning how to code.
 timeout /t 5
