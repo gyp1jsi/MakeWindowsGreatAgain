@@ -135,34 +135,16 @@ $AppXApps = @(
         "SAMSUNGELECTRONICSCO.LTD.OnlineSupportSService"
         "4AE8B7C2.BOOKING.COMPARTNERAPPSAMSUNGEDITION"
 
-        # <==========[ DIY ]==========> (Remove the # to Uninstall)
-
-        # [DIY] Default apps i'll keep
-
-        #"Microsoft.FreshPaint"             # Paint
-        #"Microsoft.MicrosoftEdge"          # Microsoft Edge
         "Microsoft.MicrosoftStickyNotes"    # Sticky Notes
-        #"Microsoft.WindowsCalculator"      # Calculator
         "Microsoft.WindowsCamera"           # Camera
-        #"Microsoft.ScreenSketch"           # Snip and Sketch (now called Snipping tool, replaces the Win32 version in clean installs)
         "Microsoft.WindowsFeedbackHub"      # Feedback Hub
-        #"Microsoft.Windows.Photos"         # Photos
 
         # [DIY] Common Streaming services
 
         "*Netflix*"                        # Netflix
         "*SpotifyMusic*"                   # Spotify
         "*Spotify*"
-        "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work
-
-        # [DIY] Can't be reinstalled
-
-        #"Microsoft.WindowsStore"           # Windows Store
-
-        # Apps which cannot be removed using Remove-AppxPackage
-        #"Microsoft.BioEnrollment"
-        #"Microsoft.WindowsFeedback"        # Feedback Module
-        #"Windows.ContactSupport"
+        "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work"
     )
     foreach ($App in $AppXApps) {
         Write-Verbose -Message ('Removing Package {0}' -f $App)
@@ -181,7 +163,7 @@ $AppXApps = @(
 $buildNumber = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
 
 if ($buildNumber -lt 21996) {
-    echo 'You are running Windows 10, the Start Menu layout will be reset'
+    Write-Output 'You are running Windows 10, the Start Menu layout will be reset'
     timeout /t 2
     $START_MENU_LAYOUT = @"
     <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
@@ -239,7 +221,7 @@ if ($buildNumber -lt 21996) {
     Remove-Item $layoutFile
 }
 if ($buildNumber -gt 21996) {
-    echo 'You are running Windows 11, a Start Menu reset will be attempted'
+    Write-Output 'You are running Windows 11, a Start Menu reset will be attempted'
     timeout /t 2
     Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage 
 }
@@ -650,6 +632,8 @@ function Optimize-ServicesRunning() {
         "iphlpsvc"                       # DEFAULT: Automatic | IP Helper Service (IPv6 (6to4, ISATAP, Port Proxy and Teredo) and IP-HTTPS)
         "lmhosts"                        # DEFAULT: Manual    | TCP/IP NetBIOS Helper
         "ndu"                            # DEFAULT: Automatic | Windows Network Data Usage Monitoring Driver (Shows network usage per-process on Task Manager)
+        "wuauserv"                       # DEFAULT: Automatic | Windows Update
+        "UsoSvc"                         # DEFAULT: Automatic | Update Orchestrator Service (Manages the download and installation of Windows updates)
         #"NetTcpPortSharing"             # DEFAULT: Disabled  | Net.Tcp Port Sharing Service
         "PhoneSvc"                       # DEFAULT: Manual    | Phone Service (Manages the telephony state on the device)
         "SCardSvr"                       # DEFAULT: Manual    | Smart Card Service
@@ -721,6 +705,79 @@ function Main() {
 }
 
 Main
+
+#Removes Microsoft Edge
+$edgeInstallPath = "C:\Program Files (x86)\Microsoft\Edge\Application"
+
+Write-Output "Do you want to uninstall Microsoft Edge? (y/n)"
+$confirm = Read-Host
+
+if ($confirm -eq "y") {
+
+    # Check if the Edge installation path exists
+    if (Test-Path $edgeInstallPath) {
+        # Change to the Edge installation path
+        Set-Location $edgeInstallPath
+
+        # Find the folder with a name starting with "1"
+        $versionFolder = Get-ChildItem -Directory | Where-Object { $_.Name -match '^1' }
+
+        # Check if the folder with a name starting with "1" was found
+        if ($versionFolder) {
+            # Change to the folder with a name starting with "1"
+            Set-Location $versionFolder.FullName
+
+            # Check if the "Installer" folder exists
+            $installerFolder = Join-Path -Path $versionFolder.FullName -ChildPath "Installer"
+            if (Test-Path $installerFolder) {
+                # Change to the "Installer" folder
+                Set-Location $installerFolder
+                Write-Output "You are now in the 'Installer' folder. Uninstalling Microsoft Edge."
+                .\setup.exe --force-uninstall --uninstall --system-level
+                Write-Output "Uninstalling Microsoft Edge non-essential related components..."
+                Remove-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force
+                Remove-Item -Path "C:\ProgramData\Microsoft\EdgeUpdate" -Recurse -Force
+                Write-Output "Microsoft Edge has been successfully uninstalled. Proceeding deleting its useless registry keys."
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-os-upgrade" -Name "CommandLine"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "location"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "UninstallString"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "DowngradeCleanupCommand"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "LastInstallerSuccessLaunchCmdLine"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\{c9abcf16-8dc2-4a95-bae3-24fd98f2ed29}" -Name "AppPath"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "path"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
+                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
+                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge" -Recurse
+                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Clients\StartMenuInternet\Microsoft Edge" -Recurse
+                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update" -Recurse
+            } else {
+                Write-Output "The folder 'Installer' does not exist in the path '$versionFolder'."
+            }
+        } else {
+            Write-Output "No folder with a name starting with '1' was found in the path '$edgeInstallPath'."
+        }
+    } else {
+        Write-Output "The path '$edgeInstallPath' does not exist."
+    }
+
+} else {
+    Write-Output "Microsoft Edge will not be uninstalled."
+}
+
+#Removes Microsoft Store
+Write-Output "Do you want to uninstall Microsoft Store? (y/n)"
+$confirm = Read-Host
+
+if ($confirm -eq "y") {
+    Write-Output "Uninstalling Microsoft Store. AppX sideload and Winget will still be available."
+    Get-AppxPackage -Name Microsoft.WindowsStore -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+    Get-AppxPackage -Name Microsoft.StorePurchaseApp -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+
+} else {
+    Write-Output "Microsoft Store will not be uninstalled."
+}
 
 #Optimizes Task Scheduler tasks
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-scheduled-task-state.psm1"
