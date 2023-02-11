@@ -226,7 +226,20 @@ if ($buildNumber -gt 21996) {
     Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage 
 }
 
-
+#Removes Microsoft Edge background tasks
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-os-upgrade" -Name "CommandLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "location"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "UninstallString"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "DowngradeCleanupCommand"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "LastInstallerSuccessLaunchCmdLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\{c9abcf16-8dc2-4a95-bae3-24fd98f2ed29}" -Name "AppPath"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "path"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
 
 #Optimizes privacy settings
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
@@ -541,6 +554,10 @@ function Optimize-Privacy() {
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
+        # Microsoft Edge keys
+        "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge"
+        "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Clients\StartMenuInternet\Microsoft Edge"
+        "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update"
         # Windows File
         "HKCR:\Extensions\ContractId\Windows.File\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
         # Registry keys to delete if they aren't uninstalled by RemoveAppXPackage/RemoveAppXProvisionedPackage
@@ -559,7 +576,6 @@ function Optimize-Privacy() {
         # Windows Share Target
         "HKCR:\Extensions\ContractId\Windows.ShareTarget\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
     )
-
     ForEach ($Key in $KeysToDelete) {
         If ((Test-Path $Key)) {
             Write-Status -Types "-", $TweakType -Status "Removing Key: [$Key]"
@@ -577,8 +593,21 @@ function Main() {
         Optimize-Privacy -Revert
     }
 }
-
 Main
+
+#Enables Windows 7 Photo Viewer
+Write-Output "Do you want to enable Windows 7 Photo Viewer? UWP one has been already uninstalled. y/n"
+$confirm = Read-Host
+if(confirm -eq "y"){
+    # Enable Windows Photo Viewer
+    Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows Live\Photo Gallery' -Name "Installation" -Value "complete"
+
+    # Set Windows Photo Viewer as the default program for opening photos
+    $registryPath = 'HKLM:\Software\Classes\SystemFileAssociations\.jpeg\OpenWithProgids'
+    Set-ItemProperty $registryPath -Name "PhotoViewer.FileAssoc" -Value "WindowsPhotoViewer.FileAssoc"
+} else {
+    Write-Output "Windows Photo Viewer will not be enabled. Good luck opening photos!"
+}
 
 #Disables some useless background services
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
@@ -705,19 +734,6 @@ function Main() {
 }
 
 Main
-
-#Removes Microsoft Edge
-$edgeInstallPath = "C:\Program Files (x86)\Microsoft\Edge\Application"
-
-Write-Output "Do you want to uninstall Microsoft Edge? (y/n)"
-$confirm = Read-Host
-
-if ($confirm -eq "y") {
-    Write-Output "Uninstalling Microsoft Edge and removing all its related components."
-    Remove-Item "C:\Program Files (x86)\Microsoft\*"
-} else {
-    Write-Output "Microsoft Edge will not be uninstalled."
-}
 
 #Removes Microsoft Store
 Write-Output "Do you want to uninstall Microsoft Store? (y/n)"
