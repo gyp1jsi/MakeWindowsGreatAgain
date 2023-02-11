@@ -713,55 +713,8 @@ Write-Output "Do you want to uninstall Microsoft Edge? (y/n)"
 $confirm = Read-Host
 
 if ($confirm -eq "y") {
-
-    # Check if the Edge installation path exists
-    if (Test-Path $edgeInstallPath) {
-        # Change to the Edge installation path
-        Set-Location $edgeInstallPath
-
-        # Find the folder with a name starting with "1"
-        $versionFolder = Get-ChildItem -Directory | Where-Object { $_.Name -match '^1' }
-
-        # Check if the folder with a name starting with "1" was found
-        if ($versionFolder) {
-            # Change to the folder with a name starting with "1"
-            Set-Location $versionFolder.FullName
-
-            # Check if the "Installer" folder exists
-            $installerFolder = Join-Path -Path $versionFolder.FullName -ChildPath "Installer"
-            if (Test-Path $installerFolder) {
-                # Change to the "Installer" folder
-                Set-Location $installerFolder
-                Write-Output "You are now in the 'Installer' folder. Uninstalling Microsoft Edge."
-                .\setup.exe --force-uninstall --uninstall --system-level
-                Write-Output "Uninstalling Microsoft Edge non-essential related components..."
-                Remove-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force
-                Remove-Item -Path "C:\ProgramData\Microsoft\EdgeUpdate" -Recurse -Force
-                Write-Output "Microsoft Edge has been successfully uninstalled. Proceeding deleting its useless registry keys."
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-os-upgrade" -Name "CommandLine"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "location"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "UninstallString"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "DowngradeCleanupCommand"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "LastInstallerSuccessLaunchCmdLine"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\{c9abcf16-8dc2-4a95-bae3-24fd98f2ed29}" -Name "AppPath"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "path"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
-                Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
-                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge" -Recurse
-                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Clients\StartMenuInternet\Microsoft Edge" -Recurse
-                Remove-Item -Path "HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update" -Recurse
-            } else {
-                Write-Output "The folder 'Installer' does not exist in the path '$versionFolder'."
-            }
-        } else {
-            Write-Output "No folder with a name starting with '1' was found in the path '$edgeInstallPath'."
-        }
-    } else {
-        Write-Output "The path '$edgeInstallPath' does not exist."
-    }
-
+    Write-Output "Uninstalling Microsoft Edge and removing all its related components."
+    Remove-Item "C:\Program Files (x86)\Microsoft\*"
 } else {
     Write-Output "Microsoft Edge will not be uninstalled."
 }
