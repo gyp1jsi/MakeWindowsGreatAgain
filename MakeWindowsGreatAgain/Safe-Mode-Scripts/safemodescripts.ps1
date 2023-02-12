@@ -8,3 +8,4 @@ if ($confirm -eq "y") {
 } else {
     Write-Output "Microsoft Edge will not be uninstalled."
 }
+timeout /t 5

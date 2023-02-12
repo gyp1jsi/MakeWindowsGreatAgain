@@ -1,8 +1,8 @@
 # Start of the script
-# Rewriting this because the script has been lost when it was almost finished :P
-# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and DarkJoker360, CamiciaNera, Twoholdem, MastroAlberto for testing
+# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and DarkJoker360, CamiciaNera, TwoHoldem, MastroAlberto, ItsHaru03 and theonlyoneferkk for testing
 
 #Removes bloatware apps
+Write-Output "Fetching AppX installed apps and removing them, please wait..."
 $AppXApps = @(
 
 # Default Windows 10+ apps
@@ -46,7 +46,6 @@ $AppXApps = @(
         "Microsoft.WindowsSoundRecorder"         # Windows Sound Recorder
         "Microsoft.XboxApp"                      # Xbox Console Companion
         "Microsoft.YourPhone"                    # Your Phone
-        "Microsoft.ZuneMusic"                    # Groove Music / (New) Windows Media Player
         "Microsoft.ZuneVideo"                    # Movies & TV
 	    "Microsoft.GamingApp"			         # Xbox App
 	    "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
@@ -594,20 +593,6 @@ function Main() {
     }
 }
 Main
-
-#Enables Windows 7 Photo Viewer
-Write-Output "Do you want to enable Windows 7 Photo Viewer? UWP one has been already uninstalled. y/n"
-$confirm = Read-Host
-if(confirm -eq "y"){
-    # Enable Windows Photo Viewer
-    Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows Live\Photo Gallery' -Name "Installation" -Value "complete"
-
-    # Set Windows Photo Viewer as the default program for opening photos
-    $registryPath = 'HKLM:\Software\Classes\SystemFileAssociations\.jpeg\OpenWithProgids'
-    Set-ItemProperty $registryPath -Name "PhotoViewer.FileAssoc" -Value "WindowsPhotoViewer.FileAssoc"
-} else {
-    Write-Output "Windows Photo Viewer will not be enabled. Good luck opening photos!"
-}
 
 #Disables some useless background services
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
