@@ -1,8 +1,8 @@
 # Start of the script
-# Rewriting this because the script has been lost when it was almost finished :P
-# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and DarkJoker360, CamiciaNera, Twoholdem, MastroAlberto for testing
+# Credits to Windows10Debloater and Win-Debloat-Tools for the script I adapted here, and DarkJoker360, CamiciaNera, TwoHoldem, MastroAlberto, ItsHaru03 and theonlyoneferkk for testing
 
 #Removes bloatware apps
+Write-Output "Fetching AppX installed apps and removing them, please wait..."
 $AppXApps = @(
 
 # Default Windows 10+ apps
@@ -46,7 +46,6 @@ $AppXApps = @(
         "Microsoft.WindowsSoundRecorder"         # Windows Sound Recorder
         "Microsoft.XboxApp"                      # Xbox Console Companion
         "Microsoft.YourPhone"                    # Your Phone
-        "Microsoft.ZuneMusic"                    # Groove Music / (New) Windows Media Player
         "Microsoft.ZuneVideo"                    # Movies & TV
 	"Microsoft.GamingApp"			 # Xbox App
 	"MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
@@ -135,34 +134,16 @@ $AppXApps = @(
         "SAMSUNGELECTRONICSCO.LTD.OnlineSupportSService"
         "4AE8B7C2.BOOKING.COMPARTNERAPPSAMSUNGEDITION"
 
-        # <==========[ DIY ]==========> (Remove the # to Uninstall)
-
-        # [DIY] Default apps i'll keep
-
-        #"Microsoft.FreshPaint"             # Paint
-        #"Microsoft.MicrosoftEdge"          # Microsoft Edge
         "Microsoft.MicrosoftStickyNotes"    # Sticky Notes
-        #"Microsoft.WindowsCalculator"      # Calculator
         "Microsoft.WindowsCamera"           # Camera
-        #"Microsoft.ScreenSketch"           # Snip and Sketch (now called Snipping tool, replaces the Win32 version in clean installs)
         "Microsoft.WindowsFeedbackHub"      # Feedback Hub
-        #"Microsoft.Windows.Photos"         # Photos
 
         # [DIY] Common Streaming services
 
         "*Netflix*"                        # Netflix
         "*SpotifyMusic*"                   # Spotify
         "*Spotify*"
-        "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work
-
-        # [DIY] Can't be reinstalled
-
-        #"Microsoft.WindowsStore"           # Windows Store
-
-        # Apps which cannot be removed using Remove-AppxPackage
-        #"Microsoft.BioEnrollment"
-        #"Microsoft.WindowsFeedback"        # Feedback Module
-        #"Windows.ContactSupport"
+        "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work"
     )
     foreach ($App in $AppXApps) {
         Write-Verbose -Message ('Removing Package {0}' -f $App)
@@ -181,7 +162,7 @@ $AppXApps = @(
 $buildNumber = (Get-CimInstance -ClassName Win32_OperatingSystem).BuildNumber
 
 if ($buildNumber -lt 21996) {
-    echo 'You are running Windows 10, the Start Menu layout will be reset'
+    Write-Output 'You are running Windows 10, the Start Menu layout will be reset'
     timeout /t 2
     $START_MENU_LAYOUT = @"
     <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
@@ -239,12 +220,25 @@ if ($buildNumber -lt 21996) {
     Remove-Item $layoutFile
 }
 if ($buildNumber -gt 21996) {
-    echo 'You are running Windows 11, a Start Menu reset will be attempted'
+    Write-Output 'You are running Windows 11, a Start Menu reset will be attempted'
     timeout /t 2
     Get-AppxPackage Microsoft.Windows.StartMenuExperienceHost | Reset-AppxPackage 
 }
 
-
+#Removes Microsoft Edge background tasks
+Remove-ItemProperty -Path "HKLM:Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-os-upgrade" -Name "CommandLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "location"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "UninstallString"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "DowngradeCleanupCommand"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\ClientState\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}" -Name "LastInstallerSuccessLaunchCmdLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\{c9abcf16-8dc2-4a95-bae3-24fd98f2ed29}" -Name "AppPath"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "path"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
+Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
 
 #Optimizes privacy settings
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
@@ -559,6 +553,10 @@ function Optimize-Privacy() {
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
         "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
+        # Microsoft Edge keys
+        "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge"
+        "HKLM:\Software\Wow6432Node\Clients\StartMenuInternet\Microsoft Edge"
+        "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update"
         # Windows File
         "HKCR:\Extensions\ContractId\Windows.File\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
         # Registry keys to delete if they aren't uninstalled by RemoveAppXPackage/RemoveAppXProvisionedPackage
@@ -577,7 +575,6 @@ function Optimize-Privacy() {
         # Windows Share Target
         "HKCR:\Extensions\ContractId\Windows.ShareTarget\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
     )
-
     ForEach ($Key in $KeysToDelete) {
         If ((Test-Path $Key)) {
             Write-Status -Types "-", $TweakType -Status "Removing Key: [$Key]"
@@ -595,7 +592,6 @@ function Main() {
         Optimize-Privacy -Revert
     }
 }
-
 Main
 
 #Disables some useless background services
@@ -650,6 +646,8 @@ function Optimize-ServicesRunning() {
         "iphlpsvc"                       # DEFAULT: Automatic | IP Helper Service (IPv6 (6to4, ISATAP, Port Proxy and Teredo) and IP-HTTPS)
         "lmhosts"                        # DEFAULT: Manual    | TCP/IP NetBIOS Helper
         "ndu"                            # DEFAULT: Automatic | Windows Network Data Usage Monitoring Driver (Shows network usage per-process on Task Manager)
+        "wuauserv"                       # DEFAULT: Automatic | Windows Update
+        "UsoSvc"                         # DEFAULT: Automatic | Update Orchestrator Service (Manages the download and installation of Windows updates)
         #"NetTcpPortSharing"             # DEFAULT: Disabled  | Net.Tcp Port Sharing Service
         "PhoneSvc"                       # DEFAULT: Manual    | Phone Service (Manages the telephony state on the device)
         "SCardSvr"                       # DEFAULT: Manual    | Smart Card Service
@@ -721,6 +719,19 @@ function Main() {
 }
 
 Main
+
+#Removes Microsoft Store
+Write-Output "Do you want to uninstall Microsoft Store? (y/n)"
+$confirm = Read-Host
+
+if ($confirm -eq "y") {
+    Write-Output "Uninstalling Microsoft Store. AppX sideload and Winget will still be available."
+    Get-AppxPackage -Name Microsoft.WindowsStore -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+    Get-AppxPackage -Name Microsoft.StorePurchaseApp -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+
+} else {
+    Write-Output "Microsoft Store will not be uninstalled."
+}
 
 #Optimizes Task Scheduler tasks
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-scheduled-task-state.psm1"
