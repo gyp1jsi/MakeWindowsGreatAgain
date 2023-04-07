@@ -15,7 +15,7 @@ This script aims to optimize Windows 10 and 11 by removing unuseful features and
 
 ## You can download from the Releases page.
 ### Extract the script and run "RUN ME AS ADMIN.bat", as administrator obviously.
-### It is recommended to update Windows and drivers first, and then run the script.
+### It is recommended to update Windows and drivers first, and then run the script, before installing other programs which may interfere with the script.
 
 ### If you want to contribute, feel free to create a Pull Request in "untested" branch. Your suggestion will be tested and committed directly to the main branch. 
 
