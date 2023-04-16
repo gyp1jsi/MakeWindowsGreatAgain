@@ -40,8 +40,6 @@ if ($confirm -eq "y") {
             "microsoft.windowscommunicationsapps"
             "Microsoft.WindowsMaps"                  # Maps
             "Microsoft.WindowsReadingList"
-            "Microsoft.WindowsSoundRecorder"         # Windows Sound Recorder
-            "Microsoft.ZuneVideo"                    # Movies & TV
             "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
     
             # Default Windows 11 apps
@@ -105,8 +103,6 @@ if ($confirm -eq "y") {
             "*Disney*"
             "*Disney.37853FC22B2CE*"                #If the above does not work
     
-            # Apps which other apps depend on
-            "Microsoft.Advertising.Xaml"
     
             # SAMSUNG Bloat
             #"SAMSUNGELECTRONICSCO.LTD.SamsungSettings1.2"          # Allow user to Tweak some hardware settings
@@ -128,7 +124,6 @@ if ($confirm -eq "y") {
             "4AE8B7C2.BOOKING.COMPARTNERAPPSAMSUNGEDITION"
     
             "Microsoft.MicrosoftStickyNotes"    # Sticky Notes
-            "Microsoft.WindowsCamera"           # Camera
             "Microsoft.WindowsFeedbackHub"      # Feedback Hub
     
             # [DIY] Common Streaming services
@@ -483,7 +478,7 @@ else {
     Write-Output "Windows will keep looking into your PC for no reason."
 }
 
-Write-Caption "Deleting useless registry keys..."
+Write-Caption "Deleting useless registry keys... if you see red lines it's because they already do not exist :)"
 $KeysToDelete = @(
     # Remove Background Tasks
     "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\46928bounde.EclipseManager_2.2.4.51_neutral__a5h4egax66k6y"
@@ -656,19 +651,6 @@ else {
     Write-Output "Unuseful services will not be disabled."
 }
 
-#Removes Microsoft Store
-Write-Output "Do you want to uninstall Microsoft Store? (DUMB DEVELOPER YOU GOTTA FIX IT ASAP!)(y/n)"
-$confirm = Read-Host
-
-if ($confirm -eq "y") {
-    Write-Output "Uninstalling Microsoft Store. AppX sideload and Winget will still be available."
-    Get-AppxPackage -Name Microsoft.WindowsStore -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-    Get-AppxPackage -Name Microsoft.StorePurchaseApp -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-    Get-AppxPackage -alluser *WindowsStore* | Remove-AppxPackage -ErrorAction SilentlyContinue
-} else {
-    Write-Output "Microsoft Store will not be uninstalled."
-}
-
 Write-Output "Do you want to disable Cortana? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -693,6 +675,3 @@ if ($confirm -eq "y") {
 else {
     Write-Output "Cortana will not be disabled."
 }
-
-Write-Output "End of the script"
-timeout /t 5

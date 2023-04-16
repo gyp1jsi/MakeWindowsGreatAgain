@@ -220,11 +220,8 @@ else {
 Write-Output "Do you want to remove Microsoft Edge? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    Write-Output "Okay. Reboot into safe mode with command prompt, run explorer.exe, and then run the "RUN ME AS ADMIN.bat" file inside the Safe-Mode-Scripts folder."
+    Write-Output "Okay. Reboot into safe mode with command prompt, run explorer.exe, and then run the "RUN-ME-AS-ADMIN.bat" file inside the Safe-Mode-Scripts folder."
 }
 else {
     Write-Output "Edge will not be removed."
 }
-
-Write-Output "End of the script"
-timeout /t 5
