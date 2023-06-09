@@ -48,8 +48,8 @@ if ($confirm -eq "y") {
             "Microsoft.XboxApp"                      # Xbox Console Companion
             "Microsoft.YourPhone"                    # Your Phone
             "Microsoft.ZuneVideo"                    # Movies & TV
-        "Microsoft.GamingApp"			 # Xbox App
-        "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
+            "Microsoft.GamingApp"			         # Xbox App
+            "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
             "*Microsoft.XboxGamingOverlay*"          # Discord is better
     
             # Default Windows 11 apps
@@ -698,6 +698,26 @@ function Optimize-ServicesRunning() {
         # - 3rd Party Services
         "gupdate"                        # DEFAULT: Automatic | Google Update Service
         "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
+    # FROM MAKEWINDOWSGREATAGAIN 1.2.1
+        "EventSystem"                    # DEFAULT: Automatic | COM+ Event System
+        "DusmSvc"                        # DEFAULT: Automatic | Data Usage
+        "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
+        "nsi"                            # DEFAULT: Automatic | Network Store Interface Service
+        "Spooler"                        # DEFAULT: Automatic | Print Spooler
+        "ShellHWDetection"               # DEFAULT: Automatic | Shell Hardware Detection
+        "SysMain"                        # DEFAULT: Automatic | SysMain
+        "SENS"                           # DEFAULT: Automatic | System Event Notification Service
+        "EventLog"                       # DEFAULT: Automatic | Windows Event Log
+        "LanmanWorkstation"              # DEFAULT: Automatic | Workstation
+        "Themes"                         # DEFAULT: Automatic | Themes
+        "ProfSvc"                        # DEFAULT: Automatic | User Profile Service
+        "SamSs"                          # DEFAULT: Automatic | Security Acoounts Manager
+        "CDPSvc"                         # DEFAULT: Automatic (Delayed Start) | Connected Devices Platform Service
+        "edgeupdate"                     # DEFAULT: Automatic (Delayed Start) | Microsoft Edge Update Service (edgeupdate)
+        "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
+        "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
+        "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
+
     )
 
     Write-Title -Text "Services tweaks"
