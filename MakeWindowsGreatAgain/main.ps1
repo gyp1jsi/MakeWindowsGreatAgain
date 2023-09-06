@@ -14,6 +14,7 @@ do {
     Write-Host "1. Hard Mode - General script for users that want the maximum level of debloat. You can decide whether to run each part of the script."
     Write-Host "2. Soft Mode - Script for who wants a lighter debloat, keeping more apps and services. Recommended on your mom's computer. You can decide whether to run each part of the script."
     Write-Host "3. Mid-Install Mode - Script for those who updated Windows, and it re-enabled services that had been disabled before. You can decide whether to run each part of the script."
+    Write-Host ""
     Write-Host "Press 1 for Hard Mode, 2 for Soft Mode or 3 for Mid-Install mode (after updates). Press Q to exit."
     $key = [System.Console]::ReadKey($true)
     switch ($key.KeyChar) {
