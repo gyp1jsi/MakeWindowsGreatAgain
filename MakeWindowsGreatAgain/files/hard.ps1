@@ -597,7 +597,6 @@ if ($confirm -eq "y") {
 			"AudioSrv",
 			"AudioEndpointBuilder",
 			"BFE",
-			"BITS",
 			"BrokerInfrastructure",
 			"CDPSvc",
 			"CDPUserSvc_dc2a4",
@@ -630,7 +629,6 @@ if ($confirm -eq "y") {
 			"SgrmBroker",
 			"ShellHWDetection",
 			"Spooler",
-			"SysMain",
 			"SystemEventsBroker",
 			"TextInputManagementService",
 			"Themes",
@@ -646,7 +644,6 @@ if ($confirm -eq "y") {
 			"WpnService",
 			"WpnUserService_dc2a4",
 			"cbdhsvc_dc2a4",
-			"edgeupdate",
 			"gpsvc",
 			"iphlpsvc",
 			"mpssvc",
@@ -690,8 +687,6 @@ function Optimize-ServicesRunning() {
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
         "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
         "dmwappushservice"                          # DEFAULT: Manual    | Device Management Wireless Application Protocol (WAP)
-        "Fax"                                       # DEFAULT: Manual    | Fax Service
-        "fhsvc"                                     # DEFAULT: Manual    | Fax History Service
         "GraphicsPerfSvc"                           # DEFAULT: Manual    | Graphics performance monitor service
         "HomeGroupListener"                         # NOT FOUND (Win 10+)| HomeGroup Listener
         "HomeGroupProvider"                         # NOT FOUND (Win 10+)| HomeGroup Provider
@@ -767,6 +762,8 @@ function Optimize-ServicesRunning() {
         "wisvc"                          # DEFAULT: Manual    | Windows Insider Program Service
         "WMPNetworkSvc"                  # DEFAULT: Manual    | Windows Media Player Network Sharing Service
         "WpnService"                     # DEFAULT: Automatic | Windows Push Notification Services (WNS)
+        "Fax"
+        "fhsvc"
         # - Diagnostic Services
         "DPS"                            # DEFAULT: Automatic | Diagnostic Policy Service
         "WdiServiceHost"                 # DEFAULT: Manual    | Diagnostic Service Host
@@ -797,7 +794,6 @@ function Optimize-ServicesRunning() {
         "DusmSvc"                        # DEFAULT: Automatic | Data Usage
         "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
         "nsi"                            # DEFAULT: Automatic | Network Store Interface Service
-        "Spooler"                        # DEFAULT: Automatic | Print Spooler
         "ShellHWDetection"               # DEFAULT: Automatic | Shell Hardware Detection
         "SysMain"                        # DEFAULT: Automatic | SysMain
         "SENS"                           # DEFAULT: Automatic | System Event Notification Service
