@@ -20,7 +20,7 @@ $softFile = "soft.ps1"
 # Avviare il file corrispondente al tasto premuto
 do {
     Write-Host ""
-    Write-Host ""
+    Write-Host "        'ALESSIO IL FAI DA TE' IS A RETARDED DOXXER, 'ZBLOODWYN' SELLS A MODIFIED VERSION OF CTT WINUTIL"
     Write-Host "       _____________.___.__________.___     ____. _________.___    ____________________________.________________________"
     Write-Host "      /  _____/\__  |   |\______   \   |   |    |/   _____/|   |  /   _____/\_   ___ \______   \   \______   \__    ___/"
     Write-Host "     /   \  ___ /   |   | |     ___/   |   |    |\_____  \ |   |  \_____  \ /    \  \/|       _/   ||     ___/ |    |   "
