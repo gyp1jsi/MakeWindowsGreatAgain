@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2023.12.25 (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.3.0 - 2023.12.25 (Hard)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
