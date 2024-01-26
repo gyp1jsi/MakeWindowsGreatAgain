@@ -622,262 +622,53 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    
-    function Stop-UnnecessaryServices
-	{
-		$servicesAuto = @"
-			"AudioSrv",
-			"AudioEndpointBuilder",
-			"BFE",
-			"BrokerInfrastructure",
-			"CDPSvc",
-			"CDPUserSvc_dc2a4",
-			"CoreMessagingRegistrar",
-			"CryptSvc",
-			"DPS",
-			"DcomLaunch",
-			"Dhcp",
-			"DispBrokerDesktopSvc",
-			"Dnscache",
-			"DoSvc",
-			"DusmSvc",
-			"EventLog",
-			"EventSystem",
-			"FontCache",
-			"LSM",
-			"LanmanServer",
-			"LanmanWorkstation",
-			"MapsBroker",
-			"MpsSvc",
-			"OneSyncSvc_dc2a4",
-			"Power",
-			"ProfSvc",
-			"RpcEptMapper",
-			"RpcSs",
-			"SCardSvr",
-			"SENS",
-			"SamSs",
-			"Schedule",
-			"SgrmBroker",
-			"ShellHWDetection",
-			"Spooler",
-			"SystemEventsBroker",
-			"TextInputManagementService",
-			"Themes",
-			"TrkWks",
-			"UserManager",
-			"VGAuthService",
-			"VMTools",
-			"WSearch",
-			"Wcmsvc",
-			"WinDefend",
-			"Winmgmt",
-			"WlanSvc",
-			"WpnService",
-			"WpnUserService_dc2a4",
-			"cbdhsvc_dc2a4",
-			"gpsvc",
-			"iphlpsvc",
-			"mpssvc",
-			"nsi",
-			"sppsvc",
-			"tiledatamodelsvc",
-			"vm3dservice",
-			"webthreatdefusersvc_dc2a4",
-			"wscsvc"
-"@		
-	
-		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
-		foreach($service in $allServices)
-		{
-			Stop-Service -Name $service.Name -PassThru
-			Set-Service $service.Name -StartupType Manual
-			"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
-		}
-	}
-        
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+    # Define the list of services to keep enabled
+$servicesToKeepEnabled = @(
+    "BrokerInfrastructure"
+    "CoreMessagingRegistrar"
+    "DcomLaunch"
+    "LSM"
+    "RpcSs"
+    "RpcEptMapper"
+    "UserManager"
+    "ProfSvc"
+    "Audiosrv"
+    "AudioEndpointBuilder"
+    "DisplayEnhancementService"
+    "SensorService"
+    "SensrSvc"
+    "hidserv"
+    "Appinfo"
+    "AppXSvc"
+    "camsvc"
+    "ClipSvc"
+    "StateRepository"
+    "InstallService"
+    "Dhcp"
+    "Dnscache"
+    "NcdAutoSetup"
+    "netprofm"
+    "NlaSvc"
+    "nsi"
+    "EventLog"
+    "WlanSvc"
+)
 
-# Adapted from: https://youtu.be/qWESrvP_uU8
-# Adapted from: https://github.com/ChrisTitusTech/win10script
-# Adapted from: https://gist.github.com/matthewjberger/2f4295887d6cb5738fa34e597f457b7f
-# Adapted from: https://github.com/Sycnex/Windows10Debloater
+# Get all the services from the registry
+$allServices = Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Services" | ForEach-Object { $_.PSChildName }
 
-function Optimize-ServicesRunning() {
-    [CmdletBinding()]
-    param (
-        [Switch] $Revert
-    )
-
-    $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
-    $EnableServicesOnSSD = @("SysMain")
-
-    # Services which will be totally disabled
-    $ServicesToDisabled = @(
-        "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
-        "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
-        "dmwappushservice"                          # DEFAULT: Manual    | Device Management Wireless Application Protocol (WAP)
-        "GraphicsPerfSvc"                           # DEFAULT: Manual    | Graphics performance monitor service
-        "HomeGroupListener"                         # NOT FOUND (Win 10+)| HomeGroup Listener
-        "HomeGroupProvider"                         # NOT FOUND (Win 10+)| HomeGroup Provider
-        "lfsvc"                                     # DEFAULT: Manual    | Geolocation Service
-        "MapsBroker"                                # DEFAULT: Automatic | Downloaded Maps Manager
-        "PcaSvc"                                    # DEFAULT: Automatic | Program Compatibility Assistant (PCA)
-        "RemoteAccess"                              # DEFAULT: Disabled  | Routing and Remote Access
-        "RemoteRegistry"                            # DEFAULT: Disabled  | Remote Registry
-        "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
-        "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
-        "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
-        "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
-        "AJRouter"
-        "AppVClient"
-        "AssignedAccessManagerSvc"
-        "cphs"
-        "cplspcon"
-        "DiagTrack"
-        "DialogBlockingService"
-        "esifsvc"
-        "ETDService"                                # In case of problems, enable again.
-        "HfcDisableService"
-        "HPAppHelperCap"
-        "HPDiagsCap"
-        "HPNetworkCap"
-        "HPOmenCap"
-        "HPSysInfoCap"
-        "HpTouchpointAnalyticsService"
-        "igccservice"
-        "igfxCUIService2.0.0.0"
-        "Intel(R) Capability Licensing Service TCP IP Interface"
-        "Intel(R) TPM Provisioning Service"
-        "IntelAudioService"
-        "jhi_service"
-        "LMS"
-        "MapsBroker"
-        "NetTcpPortSharing"
-        "NVDisplay.ContainerLocalSystem"            # In case you need NVIDIA Control Panel, enable again
-        "RemoteAccess"
-        "RemoteRegistry"
-        "RstMwService"
-        "RtkAudioUniversalService"
-        "shpamsvc"
-        "Surfshark Service"
-        "tzautoupdate"
-        "UevAgentService"
-        "WSearch"
-        "XTU3SERVICE"
-        # - Services which cannot be disabled (and shouldn't)
-        #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
-        #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
-    )
-
-    # Making the services to run only when needed as 'Manual' | Remove the # to set to Manual
-    $ServicesToManual = @(
-        "BITS"                           # DEFAULT: Manual    | Background Intelligent Transfer Service
-        "edgeupdate"                     # DEFAULT: Automatic | Microsoft Edge Update Service
-        "edgeupdatem"                    # DEFAULT: Manual    | Microsoft Edge Update Service²
-        "FontCache"                      # DEFAULT: Automatic | Windows Font Cache
-        "iphlpsvc"                       # DEFAULT: Automatic | IP Helper Service (IPv6 (6to4, ISATAP, Port Proxy and Teredo) and IP-HTTPS)
-        "lmhosts"                        # DEFAULT: Manual    | TCP/IP NetBIOS Helper
-        "ndu"                            # DEFAULT: Automatic | Windows Network Data Usage Monitoring Driver (Shows network usage per-process on Task Manager)
-        "wuauserv"                       # DEFAULT: Automatic | Windows Update
-        "UsoSvc"                         # DEFAULT: Automatic | Update Orchestrator Service (Manages the download and installation of Windows updates)
-        #"NetTcpPortSharing"             # DEFAULT: Disabled  | Net.Tcp Port Sharing Service
-        "PhoneSvc"                       # DEFAULT: Manual    | Phone Service (Manages the telephony state on the device)
-        "SCardSvr"                       # DEFAULT: Manual    | Smart Card Service
-        "SharedAccess"                   # DEFAULT: Manual    | Internet Connection Sharing (ICS)
-        "stisvc"                         # DEFAULT: Automatic | Windows Image Acquisition (WIA) Service
-        "WbioSrvc"                       # DEFAULT: Manual    | Windows Biometric Service (required for Fingerprint reader / Facial detection)
-        "Wecsvc"                         # DEFAULT: Manual    | Windows Event Collector Service
-        "WerSvc"                         # DEFAULT: Manual    | Windows Error Reporting Service
-        "wisvc"                          # DEFAULT: Manual    | Windows Insider Program Service
-        "WMPNetworkSvc"                  # DEFAULT: Manual    | Windows Media Player Network Sharing Service
-        "WpnService"                     # DEFAULT: Automatic | Windows Push Notification Services (WNS)
-        "Fax"
-        "fhsvc"
-        # - Diagnostic Services
-        "DPS"                            # DEFAULT: Automatic | Diagnostic Policy Service
-        "WdiServiceHost"                 # DEFAULT: Manual    | Diagnostic Service Host
-        "WdiSystemHost"                  # DEFAULT: Manual    | Diagnostic System Host
-        # - Bluetooth services
-        "BTAGService"                    # DEFAULT: Manual    | Bluetooth Audio Gateway Service
-        "BthAvctpSvc"                    # DEFAULT: Manual    | AVCTP Service
-        "bthserv"                        # DEFAULT: Manual    | Bluetooth Support Service
-        "RtkBtManServ"                   # DEFAULT: Automatic | Realtek Bluetooth Device Manager Service
-        # - Xbox services
-        "XblAuthManager"                 # DEFAULT: Manual    | Xbox Live Auth Manager
-        "XblGameSave"                    # DEFAULT: Manual    | Xbox Live Game Save
-        "XboxGipSvc"                     # DEFAULT: Manual    | Xbox Accessory Management Service
-        "XboxNetApiSvc"                  # DEFAULT: Manual    | Xbox Live Networking Service
-        # - NVIDIA services
-        "NVDisplay.ContainerLocalSystem" # DEFAULT: Automatic | NVIDIA Display Container LS (NVIDIA Control Panel)
-        "NvContainerLocalSystem"         # DEFAULT: Automatic | NVIDIA LocalSystem Container (GeForce Experience / NVIDIA Telemetry)
-        # - Printer services
-        #"PrintNotify"                   # DEFAULT: Manual    | WARNING! REMOVING WILL TURN PRINTING LESS MANAGEABLE | Printer Extensions and Notifications
-        #"Spooler"                       # DEFAULT: Automatic | WARNING! REMOVING WILL DISABLE PRINTING              | Print Spooler
-        # - Wi-Fi services
-        #"WlanSvc"                       # DEFAULT: Manual (No Wi-Fi devices) / Automatic (Wi-Fi devices) | WARNING! REMOVING WILL DISABLE WI-FI, DON'T TELL ME I DIDN'T WARN YOU, LITTLE PP BITCHES | WLAN AutoConfig
-        # - 3rd Party Services
-        "gupdate"                        # DEFAULT: Automatic | Google Update Service
-        "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
-    # FROM MAKEWINDOWSGREATAGAIN 1.2.1
-        "EventSystem"                    # DEFAULT: Automatic | COM+ Event System
-        "DusmSvc"                        # DEFAULT: Automatic | Data Usage
-        "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
-        "nsi"                            # DEFAULT: Automatic | Network Store Interface Service
-        "ShellHWDetection"               # DEFAULT: Automatic | Shell Hardware Detection
-        "SysMain"                        # DEFAULT: Automatic | SysMain
-        "SENS"                           # DEFAULT: Automatic | System Event Notification Service
-        "EventLog"                       # DEFAULT: Automatic | Windows Event Log
-        "LanmanWorkstation"              # DEFAULT: Automatic | Workstation
-        "Themes"                         # DEFAULT: Automatic | Themes
-        "ProfSvc"                        # DEFAULT: Automatic | User Profile Service
-        "SamSs"                          # DEFAULT: Automatic | Security Acoounts Manager
-        "CDPSvc"                         # DEFAULT: Automatic (Delayed Start) | Connected Devices Platform Service
-        "edgeupdate"                     # DEFAULT: Automatic (Delayed Start) | Microsoft Edge Update Service (edgeupdate)
-        "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
-        "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
-        "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
-
-    )
-
-    Write-Title -Text "Services tweaks"
-    Write-Section -Text "Disabling services from Windows"
-
-    If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
-        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
-        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
-    } Else {
-        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
-    }
-
-    Write-Section -Text "Enabling services from Windows"
-
-    If ($IsSystemDriveSSD -or $Revert) {
-        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
-        Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
-    }
-
-    Set-ServiceStartup -Manual -Services $ServicesToManual
-}
-
-function Main() {
-    # List all services:
-    #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
-
-    If (!$Revert) {
-        Optimize-ServicesRunning # Enable essential Services and Disable bloating Services
-    } Else {
-        Optimize-ServicesRunning -Revert
+foreach ($service in $allServices) {
+    # If the service is not in the list of services to keep enabled, disable it
+    if ($servicesToKeepEnabled -notcontains $service) {
+        Write-Host "Disabling service:" $service
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$service" -Name "Start" -Value 4
     }
 }
 
-Main
+
 }
 else {
-    Write-Output "Useless services will not be disabled."
+    Write-Output "tf are you here for then?"
 }
 
 #Removes Microsoft Store

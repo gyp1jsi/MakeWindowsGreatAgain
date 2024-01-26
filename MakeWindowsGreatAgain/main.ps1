@@ -16,6 +16,7 @@ $folderPath = Join-Path $scriptPath "files"
 # Definire i nomi dei file da avviare
 $hardFile = "hard.ps1"
 $softFile = "soft.ps1"
+$extremeFile = "extreme.ps1"
 
 # Avviare il file corrispondente al tasto premuto
 do {
@@ -37,12 +38,13 @@ do {
     Write-Host "      \_|    \___/ \____/\_| \_/  \_|   \_| |_/\___/|___/    \____/ \____/\_| \_|\___/\_|     \_/ \____/ "
     Write-Host ""
     Write-Host ""
-    Write-Host "1. Hard Mode - Full Power."
+    Write-Host "[1]. Hard Mode."
     Write-Host ""
-    Write-Host "2. Soft Mode - Mom's computer."
+    Write-Host "[2]. Soft Mode."
     Write-Host ""
+    Write-Host "[3]. Extreme (Requires manual action from the user)"
     Write-Host ""
-    Write-Host "Press 1 for Hard Mode or 2 for Soft Mode. Press Q to exit."
+    Write-Host "Press 1 for Hard Mode, 2 for Soft Mode and 3 for Extreme mode. Press Q to exit."
     $key = [System.Console]::ReadKey($true)
     switch ($key.KeyChar) {
         1 { & "$folderPath\$hardFile" }
