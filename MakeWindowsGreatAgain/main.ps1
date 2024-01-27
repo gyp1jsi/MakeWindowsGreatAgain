@@ -49,6 +49,7 @@ do {
     switch ($key.KeyChar) {
         1 { & "$folderPath\$hardFile" }
         2 { & "$folderPath\$softFile" }
+        3 { & "$folderPath\$extremeFile" }
         q { break }
         default { Write-Host "Invalid option." }
     }

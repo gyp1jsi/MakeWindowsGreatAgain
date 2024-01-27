@@ -652,6 +652,7 @@ $servicesToKeepEnabled = @(
     "nsi"
     "EventLog"
     "WlanSvc"
+    "UEFI"
 )
 
 # Get all the services from the registry
