@@ -161,6 +161,15 @@ if ($confirm -eq "y") {
         # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
         reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
         reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
+        # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+        reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /ve /d URL:ms-gamebarservices 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
