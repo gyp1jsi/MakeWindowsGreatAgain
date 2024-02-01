@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.3.0 - 2023.12.25 (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - yyyy.mm.dd (Hard)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -776,6 +776,52 @@ function Optimize-ServicesRunning() {
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
+        "Micro Star SCM"
+        "MSI_Center_Service"
+        "MSI Foundation Service"
+        "MSI_VoiceControl_Service"
+        "Mystic_Light_Service"
+        "NahimicService"
+        "NortonSecurity"
+        "nsWscSvc"
+        "FvSvc"
+        "RtkAudioUniversalService"
+        "LightKeeperService"
+        "AASSvc"
+        "AcerLightningService"
+        "DtsApo4Service"
+        "Killer Analytics Service"
+        "KNDBWM"
+        "KAPSService"
+        "McAWFwk"
+        "McAPExe"
+        "mccspsvc"
+        "mfefire"
+        "ModuleCoreService"
+        "PEFService"
+        "mfemms"
+        "mfevtp"
+        "McpManagementService"
+        "TbtP2pShortcutService"
+        "AMD Crash Defender Service"
+        "AMD External Events Utility"
+        "ArmouryCrateControlInterface"
+        "ArmouryCrateService"
+        "AsusAppService"
+        "LightingService"
+        "ASUSLinkNear"
+        "ASUSLinkRemote"
+        "ASUSOptimization"
+        "ASUSSoftwareManager"
+        "ASUSSwitch"
+        "ASUSSystemAnalysis"
+        "ASUSSystemDiagnosis"
+        "asus"
+        "asusm"
+        "AsusCertService"
+        "FMAPOService"
+        "mc-wps-secdashboardservice"
+        "Aura Wallpaper Service"        
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -848,6 +894,7 @@ function Optimize-ServicesRunning() {
         "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
         "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
         "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
+        "Killer Network Service"
 
     )
 
