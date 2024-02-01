@@ -737,7 +737,6 @@ function Optimize-ServicesRunning() {
         "RemoteAccess"                              # DEFAULT: Disabled  | Routing and Remote Access
         "RemoteRegistry"                            # DEFAULT: Disabled  | Remote Registry
         "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
-        "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
         "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
         "AJRouter"

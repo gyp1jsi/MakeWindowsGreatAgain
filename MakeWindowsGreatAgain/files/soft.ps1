@@ -537,10 +537,10 @@ ForEach ($Key in $KeysToDelete) {
     }
 }
 
-Write-Output "Do you want to disable and stop unuseful services? (y/n)"
+Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    Write-Output "The unuseful services will be removed."
+    Write-Output "The useless services will be removed."
     Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
@@ -768,7 +768,7 @@ function Main() {
 Main
 }
 else {
-    Write-Output "Unuseful services will not be disabled."
+    Write-Output "Useless services will not be disabled."
 }
 
 Write-Output "Do you want to disable Cortana? (y/n)"

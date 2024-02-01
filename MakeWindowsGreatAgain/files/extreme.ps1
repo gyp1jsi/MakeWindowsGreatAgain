@@ -618,6 +618,16 @@ If (!$Revert) {
 }
 Main
 
+Write-Output "Do you want to disable UAC? (User Account Control) (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    Set-ItemProperty -Path REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System -Name ConsentPromptBehaviorAdmin -Value 0
+}
+else {
+    Write-Output "UAC will not be disabled."
+}
+
+
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -691,11 +701,114 @@ foreach ($service in $allServices) {
     # If the service is not in the list of services to keep enabled, disable it
     if ($servicesToKeepEnabled -notcontains $service) {
         Write-Host "Disabling service:" $service
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$service" -Name "Start" -Value 4
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$service" -Name "Start" -Value 3
     }
 }
 
-
+$ServicesToDisabled(
+        "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
+        "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
+        "dmwappushservice"                          # DEFAULT: Manual    | Device Management Wireless Application Protocol (WAP)
+        "GraphicsPerfSvc"                           # DEFAULT: Manual    | Graphics performance monitor service
+        "HomeGroupListener"                         # NOT FOUND (Win 10+)| HomeGroup Listener
+        "HomeGroupProvider"                         # NOT FOUND (Win 10+)| HomeGroup Provider
+        "lfsvc"                                     # DEFAULT: Manual    | Geolocation Service
+        "MapsBroker"                                # DEFAULT: Automatic | Downloaded Maps Manager
+        "PcaSvc"                                    # DEFAULT: Automatic | Program Compatibility Assistant (PCA)
+        "RemoteAccess"                              # DEFAULT: Disabled  | Routing and Remote Access
+        "RemoteRegistry"                            # DEFAULT: Disabled  | Remote Registry
+        "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
+        "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
+        "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
+        "AJRouter"
+        "AppVClient"
+        "AssignedAccessManagerSvc"
+        "cphs"
+        "cplspcon"
+        "DiagTrack"
+        "DialogBlockingService"
+        "esifsvc"
+        "ETDService"                                # In case of problems, enable again.
+        "HfcDisableService"
+        "HPAppHelperCap"
+        "HPDiagsCap"
+        "HPNetworkCap"
+        "HPOmenCap"
+        "HPSysInfoCap"
+        "HpTouchpointAnalyticsService"
+        "igccservice"
+        "igfxCUIService2.0.0.0"
+        "Intel(R) Capability Licensing Service TCP IP Interface"
+        "Intel(R) TPM Provisioning Service"
+        "IntelAudioService"
+        "jhi_service"
+        "LMS"
+        "MapsBroker"
+        "NetTcpPortSharing"
+        "NVDisplay.ContainerLocalSystem"            # In case you need NVIDIA Control Panel, enable again
+        "RemoteAccess"
+        "RemoteRegistry"
+        "RstMwService"
+        "RtkAudioUniversalService"
+        "shpamsvc"
+        "Surfshark Service"
+        "tzautoupdate"
+        "UevAgentService"
+        "WSearch"
+        "XTU3SERVICE"
+        "Micro Star SCM"
+        "MSI_Center_Service"
+        "MSI Foundation Service"
+        "MSI_VoiceControl_Service"
+        "Mystic_Light_Service"
+        "NahimicService"
+        "NortonSecurity"
+        "nsWscSvc"
+        "FvSvc"
+        "RtkAudioUniversalService"
+        "LightKeeperService"
+        "AASSvc"
+        "AcerLightningService"
+        "DtsApo4Service"
+        "Killer Analytics Service"
+        "KNDBWM"
+        "KAPSService"
+        "McAWFwk"
+        "McAPExe"
+        "mccspsvc"
+        "mfefire"
+        "ModuleCoreService"
+        "PEFService"
+        "mfemms"
+        "mfevtp"
+        "McpManagementService"
+        "TbtP2pShortcutService"
+        "AMD Crash Defender Service"
+        "AMD External Events Utility"
+        "ArmouryCrateControlInterface"
+        "ArmouryCrateService"
+        "AsusAppService"
+        "LightingService"
+        "ASUSLinkNear"
+        "ASUSLinkRemote"
+        "ASUSOptimization"
+        "ASUSSoftwareManager"
+        "ASUSSwitch"
+        "ASUSSystemAnalysis"
+        "ASUSSystemDiagnosis"
+        "asus"
+        "asusm"
+        "AsusCertService"
+        "FMAPOService"
+        "mc-wps-secdashboardservice"
+        "Aura Wallpaper Service"
+        "wuaserv"       #  Windows Update
+        "UsoSvc"        #  Update Orchestrator Service
+        # - Services which cannot be disabled (and shouldn't)
+        #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
+        #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
+)
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$ServicesToDisabled" -Name "Start" -Value 4
 }
 else {
     Write-Output "tf are you here for then?"
