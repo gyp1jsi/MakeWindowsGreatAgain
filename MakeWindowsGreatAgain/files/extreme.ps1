@@ -633,10 +633,13 @@ $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
     # Define the list of services to keep enabled
-$servicesToKeepEnabled = @(
+    function Stop-UnnecessaryServices
+	{
+		$servicesToExclude = @(
 			"AudioSrv",
 			"AudioEndpointBuilder",
 			"BFE",
+			"BITS",
 			"BrokerInfrastructure",
 			"CDPSvc",
 			"CDPUserSvc_dc2a4",
@@ -657,6 +660,7 @@ $servicesToKeepEnabled = @(
 			"LanmanWorkstation",
 			"MapsBroker",
 			"MpsSvc",
+			"OneSyncSvc_dc2a4",
 			"Power",
 			"ProfSvc",
 			"RpcEptMapper",
@@ -668,6 +672,7 @@ $servicesToKeepEnabled = @(
 			"SgrmBroker",
 			"ShellHWDetection",
 			"Spooler",
+			"SysMain",
 			"SystemEventsBroker",
 			"TextInputManagementService",
 			"Themes",
@@ -683,6 +688,7 @@ $servicesToKeepEnabled = @(
 			"WpnService",
 			"WpnUserService_dc2a4",
 			"cbdhsvc_dc2a4",
+			"edgeupdate",
 			"gpsvc",
 			"iphlpsvc",
 			"mpssvc",
@@ -692,20 +698,18 @@ $servicesToKeepEnabled = @(
 			"vm3dservice",
 			"webthreatdefusersvc_dc2a4",
 			"wscsvc"
-)
-
-# Get all the services from the registry
-$allServices = Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Services" | ForEach-Object { $_.PSChildName }
-
-foreach ($service in $allServices) {
-    # If the service is not in the list of services to keep enabled, disable it
-    if ($servicesToKeepEnabled -notcontains $service) {
-        Write-Host "Disabling service:" $service
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$service" -Name "Start" -Value 3
+)	
+	
+		$runningServices = Get-Service | Where-Object { $servicesToExclude -notcontains $_.Name }
+		foreach($service in $runningServices)
+		{
+            Stop-Service -Name $service.Name -PassThru
+			Set-Service $service.Name -StartupType Manual
+			"Stopping service $($service.Name)"
+        }
     }
-}
 
-$ServicesToDisabled(
+    $ServicesToDisabled= @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
         "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
         "dmwappushservice"                          # DEFAULT: Manual    | Device Management Wireless Application Protocol (WAP)
@@ -807,7 +811,7 @@ $ServicesToDisabled(
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
-)
+    )
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$ServicesToDisabled" -Name "Start" -Value 4
 }
 else {
