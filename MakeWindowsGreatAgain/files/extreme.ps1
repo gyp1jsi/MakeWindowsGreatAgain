@@ -812,7 +812,7 @@ if ($confirm -eq "y") {
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
     )
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$ServicesToDisabled" -Name "Start" -Value 4
+    Set-Service $ServicesToDisabled -StartupType Disabled
 }
 else {
     Write-Output "tf are you here for then?"
