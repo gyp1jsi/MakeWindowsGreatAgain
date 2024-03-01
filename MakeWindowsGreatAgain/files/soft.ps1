@@ -1,5 +1,7 @@
 # For those who don't rape Windows
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - yyyy.mm.dd (Soft)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Soft)'
+
+# Pre-Installed Bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 

@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - yyyy.mm.dd (Extreme)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Extreme)'
 
 # Pre-Installed bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
@@ -56,6 +56,10 @@ if ($confirm -eq "y") {
             "MicrosoftWindows.Client.WebExperience"  # Taskbar Widgets
             "MicrosoftTeams"                         # Microsoft Teams / Preview
             "*Teams*"                                # Chat
+            "MicrosoftWindows.UndockedDevKit"
+            "Microsoft.Windows.ParentalControls"
+            "Microsoft.Windows.Photos"
+            "Microsoft.PowerAutomateDesktop"
     
             # 3rd party Apps
             "*ACGMediaPlayer*"

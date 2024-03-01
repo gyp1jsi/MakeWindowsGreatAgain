@@ -1,3 +1,4 @@
+$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Menu)"
 Write-Output "DID YOU INSTALL EVERY UPDATE? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -21,7 +22,7 @@ $extremeFile = "extreme.ps1"
 # Avviare il file corrispondente al tasto premuto
 do {
     Write-Host ""
-    Write-Host "        'ALESSIO IL FAI DA TE' IS A RETARDED DOXXER, 'ZBLOODWYN' SELLS A MODIFIED VERSION OF CTT WINUTIL"
+    Write-Host ""
     Write-Host "       _____________.___.__________.___     ____. _________.___    ____________________________.________________________"
     Write-Host "      /  _____/\__  |   |\______   \   |   |    |/   _____/|   |  /   _____/\_   ___ \______   \   \______   \__    ___/"
     Write-Host "     /   \  ___ /   |   | |     ___/   |   |    |\_____  \ |   |  \_____  \ /    \  \/|       _/   ||     ___/ |    |   "
@@ -37,12 +38,15 @@ do {
     Write-Host "      | |   | |_| | \__/\| |\  \  | |   | | | |_| |_| |/ /   /\__/ / \__/\| |\ \ _| |_| |     | | /\__/ /"
     Write-Host "      \_|    \___/ \____/\_| \_/  \_|   \_| |_/\___/|___/    \____/ \____/\_| \_|\___/\_|     \_/ \____/ "
     Write-Host ""
+    Write-Host "    TO ALESSIO IL FAI DA TE: KEEP CRYING, RETARDED DOXXER!"
+    Write-Host "    TO ZBLOODWYN: KEEP SELLING YOUR CTT BOOTLEG TO NEWBIES, I AM COMING!"
     Write-Host ""
-    Write-Host "[1]. Hard Mode."
     Write-Host ""
-    Write-Host "[2]. Soft Mode."
+    Write-Host "[1]. Hard Mode - Recommended."
     Write-Host ""
-    Write-Host "[3]. Extreme (Requires manual action from the user)"
+    Write-Host "[2]. Soft Mode - For your mom's computer."
+    Write-Host ""
+    Write-Host "[3]. Extreme - Disables core services. For experts users. You're on your own."
     Write-Host ""
     Write-Host "Press 1 for Hard Mode, 2 for Soft Mode and 3 for Extreme mode. Press Q to exit."
     $key = [System.Console]::ReadKey($true)

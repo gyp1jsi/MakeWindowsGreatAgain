@@ -1,4 +1,6 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - yyyy.mm.dd (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Hard)'
+
+# Pre-Installed Bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -54,6 +56,10 @@ if ($confirm -eq "y") {
             "MicrosoftWindows.Client.WebExperience"  # Taskbar Widgets
             "MicrosoftTeams"                         # Microsoft Teams / Preview
             "*Teams*"                                # Chat
+            "MicrosoftWindows.UndockedDevKit"
+            "Microsoft.Windows.ParentalControls"
+            "Microsoft.Windows.Photos"
+            "Microsoft.PowerAutomateDesktop"
     
             # 3rd party Apps
             "*ACGMediaPlayer*"
@@ -269,7 +275,7 @@ else {
 }
 
 
-#Removes Microsoft Edge background tasks
+#Microsoft Edge background tasks
 Remove-ItemProperty -Path "HKLM:Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
@@ -627,14 +633,12 @@ If (!$Revert) {
 }
 Main
 
+# Services
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    
-    function Stop-UnnecessaryServices
-	{
-		$servicesAuto = @"
+    $servicesAuto = @"
 			"AudioSrv",
 			"AudioEndpointBuilder",
 			"BFE",
@@ -719,10 +723,6 @@ function Optimize-ServicesRunning() {
     param (
         [Switch] $Revert
     )
-
-    $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
-    $EnableServicesOnSSD = @("SysMain")
-
     # Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
@@ -900,24 +900,9 @@ function Optimize-ServicesRunning() {
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
 
-    If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
-        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
-        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
-    } Else {
-        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
-    }
-
-    Write-Section -Text "Enabling services from Windows"
-
-    If ($IsSystemDriveSSD -or $Revert) {
-        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
-        Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
-    }
-
-    Set-ServiceStartup -Manual -Services $ServicesToManual
+        Set-ServiceStartup -Disabled -Services $ServicesToDisabled
+        Set-ServiceStartup -Manual -Services $ServicesToManual
 }
-
 function Main() {
     # List all services:
     #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
@@ -928,14 +913,11 @@ function Main() {
         Optimize-ServicesRunning -Revert
     }
 }
-
-Main
-}
 else {
     Write-Output "Useless services will not be disabled."
 }
 
-#Removes Microsoft Store
+# Microsoft Store
 Write-Output "Do you want to uninstall Microsoft Store?(y/n)"
 $confirm = Read-Host
 
@@ -949,7 +931,7 @@ if ($confirm -eq "y") {
 }
 
 
-#Removes Microsoft Edge
+# Microsoft Edge
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 
