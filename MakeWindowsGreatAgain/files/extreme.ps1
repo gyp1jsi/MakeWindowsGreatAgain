@@ -711,7 +711,7 @@ if ($confirm -eq "y") {
 $allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
 foreach($service in $allServices)
 {
-    Stop-Service -Name $service.Name -PassThru
+    Stop-Service -Name $service.Name -Force -PassThru
     Set-Service $service.Name -StartupType Manual
     "Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
 }
