@@ -650,7 +650,7 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    $servicesAuto (
+    $servicesAuto @(
     "AudioSrv",
     "AudioEndpointBuilder",
     "BFE",
