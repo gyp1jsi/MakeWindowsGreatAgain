@@ -40,6 +40,7 @@ do {
     Write-Host ""
     Write-Host "    TO ALESSIO IL FAI DA TE: KEEP CRYING, RETARDED DOXXER!"
     Write-Host "    TO ZBLOODWYN: KEEP SELLING YOUR CTT BOOTLEG TO NEWBIES, I AM COMING!"
+    Write-Host "    TO DEMILS: LESS BULLSHIT ONLINE, GET OUT AND GET A LIFE!"
     Write-Host ""
     Write-Host ""
     Write-Host "[1]. Hard Mode - Recommended."
