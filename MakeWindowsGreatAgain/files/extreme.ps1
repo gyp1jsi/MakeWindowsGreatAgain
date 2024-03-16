@@ -1,6 +1,6 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Extreme)'
 
-# Pre-Installed Bloatware
+# Pre-Installed bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -167,15 +167,6 @@ if ($confirm -eq "y") {
         # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
         reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
         reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
-        # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-        reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
-        reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebar\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /ve /d URL:ms-gamebarservices 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /v "URL Protocol" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /v "NoOpenWith" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebarservices\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
@@ -201,7 +192,7 @@ if ($confirm -eq "y"){
 }
 
 
-#Removes Live Tiles Bloatware
+# Removes Live Tiles Bloatware
 
 $OS = Get-WmiObject -Class Win32_OperatingSystem
 $buildNumber = $OS.BuildNumber
@@ -275,7 +266,7 @@ else {
 }
 
 
-#Microsoft Edge background tasks
+# Microsoft Edge background tasks
 Remove-ItemProperty -Path "HKLM:Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
@@ -584,6 +575,7 @@ else {
     Write-Output "Windows will keep looking into your PC for no reason."
 }
 
+# Bloat regedit
 Write-Caption "Deleting useless registry keys..."
 $KeysToDelete = @(
     # Remove Background Tasks
@@ -633,82 +625,103 @@ If (!$Revert) {
 }
 Main
 
+# User Account Control
+Write-Output "Do you want to disable UAC? (User Account Control) (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    Set-ItemProperty -Path REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System -Name ConsentPromptBehaviorAdmin -Value 0
+}
+else {
+    Write-Output "UAC will not be disabled."
+}
+
+# Notification Tray/Calendar
+Write-Output "Do you want to remove notification tray/calendar? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+    Set-ItemProperty -Path "HKCU:\Software\Policies\\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -Type DWord -Value 0
+
+}
+
 # Services
+# Adapted from: https://github.com/ChrisTitusTech/winutil
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    $servicesAuto = @"
-			"AudioSrv",
-			"AudioEndpointBuilder",
-			"BFE",
-			"BrokerInfrastructure",
-			"CDPSvc",
-			"CDPUserSvc_dc2a4",
-			"CoreMessagingRegistrar",
-			"CryptSvc",
-			"DPS",
-			"DcomLaunch",
-			"Dhcp",
-			"DispBrokerDesktopSvc",
-			"Dnscache",
-			"DoSvc",
-			"DusmSvc",
-			"EventLog",
-			"EventSystem",
-			"FontCache",
-			"LSM",
-			"LanmanServer",
-			"LanmanWorkstation",
-			"MapsBroker",
-			"MpsSvc",
-			"OneSyncSvc_dc2a4",
-			"Power",
-			"ProfSvc",
-			"RpcEptMapper",
-			"RpcSs",
-			"SCardSvr",
-			"SENS",
-			"SamSs",
-			"Schedule",
-			"SgrmBroker",
-			"ShellHWDetection",
-			"Spooler",
-			"SystemEventsBroker",
-			"TextInputManagementService",
-			"Themes",
-			"TrkWks",
-			"UserManager",
-			"VGAuthService",
-			"VMTools",
-			"WSearch",
-			"Wcmsvc",
-			"WinDefend",
-			"Winmgmt",
-			"WlanSvc",
-			"WpnService",
-			"WpnUserService_dc2a4",
-			"cbdhsvc_dc2a4",
-			"gpsvc",
-			"iphlpsvc",
-			"mpssvc",
-			"nsi",
-			"sppsvc",
-			"tiledatamodelsvc",
-			"vm3dservice",
-			"webthreatdefusersvc_dc2a4",
-			"wscsvc"
-"@		
-	
-		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
-		foreach($service in $allServices)
-		{
-			Stop-Service -Name $service.Name -PassThru
-			Set-Service $service.Name -StartupType Manual
-			"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
-		}
-	}
-        
+    $servicesAuto (
+    "AudioSrv",
+    "AudioEndpointBuilder",
+    "BFE",
+    "BrokerInfrastructure",
+    "CDPSvc",
+    "CDPUserSvc_dc2a4",
+    "CoreMessagingRegistrar",
+    "CryptSvc",
+    "DPS",
+    "DcomLaunch",
+    "Dhcp",
+    "DispBrokerDesktopSvc",
+    "Dnscache",
+    "DoSvc",
+    "DusmSvc",
+    "EventLog",
+    "EventSystem",
+    "FontCache",
+    "LSM",
+    "LanmanServer",
+    "LanmanWorkstation",
+    "MapsBroker",
+    "MpsSvc",
+    "OneSyncSvc_dc2a4",
+    "Power",
+    "ProfSvc",
+    "RpcEptMapper",
+    "RpcSs",
+    "SCardSvr",
+    "SENS",
+    "SamSs",
+    "Schedule",
+    "SgrmBroker",
+    "ShellHWDetection",
+    "Spooler",
+    "SystemEventsBroker",
+    "TextInputManagementService",
+    "Themes",
+    "TrkWks",
+    "UserManager",
+    "VGAuthService",
+    "VMTools",
+    "WSearch",
+    "Wcmsvc",
+    "WinDefend",
+    "Winmgmt",
+    "WlanSvc",
+    "WpnService",
+    "WpnUserService_dc2a4",
+    "cbdhsvc_dc2a4",
+    "gpsvc",
+    "iphlpsvc",
+    "mpssvc",
+    "nsi",
+    "sppsvc",
+    "tiledatamodelsvc",
+    "vm3dservice",
+    "webthreatdefusersvc_dc2a4",
+    "wscsvc"
+    "Audiosrv"
+    "dot3svc"
+    "WlanSvc"
+)		
+
+$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
+foreach($service in $allServices)
+{
+    Stop-Service -Name $service.Name -Force -PassThru
+    Set-Service $service.Name -StartupType Manual
+    "Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
+}
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
@@ -718,11 +731,6 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
 # Adapted from: https://gist.github.com/matthewjberger/2f4295887d6cb5738fa34e597f457b7f
 # Adapted from: https://github.com/Sycnex/Windows10Debloater
 
-function Optimize-ServicesRunning() {
-    [CmdletBinding()]
-    param (
-        [Switch] $Revert
-    )
     # Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
@@ -737,6 +745,7 @@ function Optimize-ServicesRunning() {
         "RemoteAccess"                              # DEFAULT: Disabled  | Routing and Remote Access
         "RemoteRegistry"                            # DEFAULT: Disabled  | Remote Registry
         "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
+        "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
         "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
         "AJRouter"
@@ -820,7 +829,31 @@ function Optimize-ServicesRunning() {
         "AsusCertService"
         "FMAPOService"
         "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"        
+        "Aura Wallpaper Service"
+        "UevAgentService"
+        "tzautoupdate"
+        "ssh-agent"
+        "shpamsvc"
+        "SECOMNService"
+        "RtkAudioUniversalService"
+        "RemoteRegistry"
+        "RemoteAccess"
+        "NetTcpPortSharing"
+        "MapsBroker"
+        "LMS"
+        "jhi_service"
+        "DusmSvc"
+        "DisplayEnhancementService"
+        "DispBrokerDesktopSvc"
+        "DialogBlockingService"
+        "DiagTrack"
+        "cplspcon"
+        "cphs"
+        "camsvc"
+        "BDESVC"
+        "AssignedAccessManagerSvc"
+        "AppVClient"
+        "AJRouter"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -875,7 +908,7 @@ function Optimize-ServicesRunning() {
         # - 3rd Party Services
         "gupdate"                        # DEFAULT: Automatic | Google Update Service
         "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
-    # FROM MAKEWINDOWSGREATAGAIN 1.2.1
+
         "EventSystem"                    # DEFAULT: Automatic | COM+ Event System
         "DusmSvc"                        # DEFAULT: Automatic | Data Usage
         "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
@@ -893,16 +926,210 @@ function Optimize-ServicesRunning() {
         "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
         "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
         "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
-        "Killer Network Service"
-
+        "UserDataSvc_2b9ad"
+        "UnistoreSvc_2b9ad"
+        "UdkUserSvc_2b9ad"
+        "PrintWorkflowUserSvc_2b9ad"
+        "PimIndexMaintenanceSvc_2b9ad"
+        "DevicesFlowUserSvc_2b9ad"
+        "DevicePickerUserSvc_2b9ad"
+        "DeviceAssociationBrokerSvc_2b9ad"
+        "CredentialEnrollmentManagerUserSvc_2b9ad"
+        "ConsentUxUserSvc_2b9ad"
+        "cbdhsvc_2b9ad"
+        "CaptureService_2b9ad"
+        "BcastDVRUserService_2b9ad"
+        "AarSvc_2b9ad"
+        "XboxNetApiSvc"
+        "XblAuthManager"
+        "WwanSvc"
+        "WpnService"
+        "WpcMonSvc"
+        "workfolderssvc"
+        "WMPNetworkSvc"
+        "wmiApSrv"
+        "WManSvc"
+        "WinRM"
+        "WinHttpAutoProxySvc"
+        "WiaRpc"
+        "wercplsupport"
+        "Wecsvc"
+        "WdNisSvc"
+        "WdiSystemHost"
+        "WdiServiceHost"
+        "wcncsvc"
+        "wbengine"
+        "WalletService"
+        "WaaSMedicSvc"
+        "VSS"
+        "vds"
+        "VacSvc"
+        "UsoSvc"
+        "upnphost"
+        "UmRdpService"
+        "TrustedInstaller"
+        "TroubleshootingSvc"
+        "TokenBroker"
+        "TieringEngineService"
+        "TapiSrv"
+        "swprv"
+        "Surfshark WireGuard"
+        "StateRepository"
+        "SstpSvc"
+        "SSDPSRV"
+        "SNMPTRAP"
+        "smphost"
+        "SharedRealitySvc"
+        "SessionEnv"
+        "Sense"
+        "SecurityHealthService"
+        "seclogon"
+        "SDRSVC"
+        "SCPolicySvc"
+        "RtkBtManServ"
+        "RpcLocator"
+        "RmSvc"
+        "RetailDemo"
+        "RasAuto"
+        "QWAVE"
+        "PrintNotify"
+        "PNRPsvc"
+        "PNRPAutoReg"
+        "PlugPlay"
+        "pla"
+        "PerfHost"
+        "perceptionsimulation"
+        "PeerDistSvc"
+        "PcaSvc"
+        "p2psvc"
+        "p2pimsvc"
+        "NVDisplay.ContainerLocalSystem"
+        "NlaSvc"
+        "netprofm"
+        "Netman"
+        "MsKeyboardFilter"
+        "msiserver"
+        "MSiSCSI"
+        "MSDTC"
+        "MozillaMaintenance"
+        "LxpSvc"
+        "lltdsvc"
+        "InstallService"
+        "fdPHost"
+        "Fax"
+        "EventLog"
+        "EntAppSvc"
+        "Eaphost"
+        "DPS"
+        "dot3svc"
+        "DmEnrollmentSvc"
+        "diagnosticshub.standardcollector.service"
+        "defragsvc"
+        "COMSysApp"
+        "BITS"
+        "AxInstSV"
+        "AppReadiness"
+        "AppMgmt"
+        "ALG"
+        "MessagingService_2b9ad"
+        "BluetoothUserService_2b9ad"
+        "XboxGipSvc"
+        "XblGameSave"
+        "wuauserv"
+        "WPDBusEnum"
+        "wlpasvc"
+        "wlidsvc"
+        "wisvc"
+        "WFDSConMgrSvc"
+        "WerSvc"
+        "WEPHOSTSVC"
+        "WebClient"
+        "WbioSrvc"
+        "WarpJITSvc"
+        "W32Time"
+        "vmicvss"
+        "vmicvmsession"
+        "vmictimesync"
+        "vmicshutdown"
+        "vmicrdv"
+        "vmickvpexchange"
+        "vmicheartbeat"
+        "vmicguestinterface"
+        "TimeBrokerSvc"
+        "TabletInputService"
+        "svsvc"
+        "StorSvc"
+        "spectrum"
+        "SmsRouter"
+        "SharedAccess"
+        "SensrSvc"
+        "SensorService"
+        "SensorDataService"
+        "SEMgrSvc"
+        "ScDeviceEnum"
+        "SCardSvr"
+        "PushToInstall"
+        "PolicyAgent"
+        "PhoneSvc"
+        "NgcSvc"
+        "NgcCtnrSvc"
+        "NetSetupSvc"
+        "NcdAutoSetup"
+        "NcbService"
+        "NcaSvc"
+        "NaturalAuthentication"
+        "lmhosts"
+        "LicenseManager"
+        "lfsvc"
+        "KtmRm"
+        "IpxlatCfgSvc"
+        "IKEEXT"
+        "icssvc"
+        "HvHost"
+        "hidserv"
+        "GraphicsPerfSvc"
+        "FrameServer"
+        "fhsvc"
+        "FDResPub"
+        "embeddedmode"
+        "EFS"
+        "edgeupdatem"
+        "edgeupdate"
+        "DsSvc"
+        "DsmSvc"
+        "dmwappushservice"
+        "diagsvc"
+        "DevQueryBroker"
+        "DeviceInstall"
+        "DeviceAssociationService"
+        "CscService"
+        "ClipSVC"
+        "CertPropSvc"
+        "CDPSvc"
+        "bthserv"
+        "BthAvctpSvc"
+        "BTAGService"
+        "autotimesvc"
+        "AppXSvc"
+        "Appinfo"
+        "AppIDSvc"
     )
 
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
 
-        Set-ServiceStartup -Disabled -Services $ServicesToDisabled
-        Set-ServiceStartup -Manual -Services $ServicesToManual
+    If ($Revert) {
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Disabled' on Startup ..." }
+        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
+    } Else {
+        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
+    }
+
+    Set-ServiceStartup -Manual -Services $ServicesToManual
 }
+
+
 function Main() {
     # List all services:
     #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
@@ -913,11 +1140,14 @@ function Main() {
         Optimize-ServicesRunning -Revert
     }
 }
+
+Main
+
 else {
-    Write-Output "Useless services will not be disabled."
+    Write-Output "tf are you here for, then?"
 }
 
-# Microsoft Store
+#Removes Microsoft Store
 Write-Output "Do you want to uninstall Microsoft Store?(y/n)"
 $confirm = Read-Host
 
@@ -931,7 +1161,7 @@ if ($confirm -eq "y") {
 }
 
 
-# Microsoft Edge
+#Removes Microsoft Edge
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 
