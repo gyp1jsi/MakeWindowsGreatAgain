@@ -650,7 +650,7 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    $servicesAuto = @"
+    $servicesAuto (
     "AudioSrv",
     "AudioEndpointBuilder",
     "BFE",
@@ -710,7 +710,10 @@ if ($confirm -eq "y") {
     "vm3dservice",
     "webthreatdefusersvc_dc2a4",
     "wscsvc"
-"@		
+    "Audiosrv"
+    "dot3svc"
+    "WlanSvc"
+)		
 
 $allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
 foreach($service in $allServices)
