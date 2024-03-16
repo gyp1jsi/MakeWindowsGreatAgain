@@ -73,9 +73,3 @@ else {
 else {
     Write-Output "Run again the script when you'll have done everything."
 }
-
-
-
-
-
-

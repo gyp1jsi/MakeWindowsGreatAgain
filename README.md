@@ -22,6 +22,3 @@ NVIDIA Control Panel: "NVIDIA Display Container LS" (NVDisplay.ContainerLocalSys
 
 # Contribute
 If you want to contribute, feel free to create a Pull Request in "untested" branch. Your suggestion will be tested and committed to the main branch. 
-
-
-
