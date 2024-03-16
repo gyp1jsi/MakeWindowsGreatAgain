@@ -18,6 +18,8 @@ Printing services: Handled by "Server" (LanmanServer) and "Workstation" (LanmanW
 
 Trackpad: "ELAN Service" (ETDService)
 
+NVIDIA Control Panel: "NVIDIA Display Container LS" (NVDisplay.ContainerLocalSystem)
+
 # Contribute
 If you want to contribute, feel free to create a Pull Request in "untested" branch. Your suggestion will be tested and committed to the main branch. 
 
