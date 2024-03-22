@@ -946,11 +946,6 @@ $remove_appx = @("MicrosoftEdge")
 $skip = @() # Optional: @("DevTools")
 
 $also_remove_webview = 0
-if ($also_remove_webview -eq 1) {
-    $remove_win32 += "Microsoft EdgeWebView"
-    $remove_appx += "WebExperience", "Win32WebViewHost"
-}
-
 # Administrative Privileges Check
 
 # Get the 'SetPrivilege' method from System.Diagnostics.Process type
@@ -1398,8 +1393,8 @@ if ($edgeRemovalPath) {
 if (-not (Get-Process -Name 'explorer' -ErrorAction SilentlyContinue)) {
     Start-Process 'explorer'
 }
-    
-} else {
+} 
+else {
     Write-Output "Microsoft Edge will not be uninstalled."
 }
 
