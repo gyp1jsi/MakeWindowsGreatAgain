@@ -1,6 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Hard)'
-
-# Pre-Installed Bloatware
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (rev 2024.03.22) (Hard)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -56,10 +54,6 @@ if ($confirm -eq "y") {
             "MicrosoftWindows.Client.WebExperience"  # Taskbar Widgets
             "MicrosoftTeams"                         # Microsoft Teams / Preview
             "*Teams*"                                # Chat
-            "MicrosoftWindows.UndockedDevKit"
-            "Microsoft.Windows.ParentalControls"
-            "Microsoft.Windows.Photos"
-            "Microsoft.PowerAutomateDesktop"
     
             # 3rd party Apps
             "*ACGMediaPlayer*"
@@ -102,8 +96,7 @@ if ($confirm -eq "y") {
             "*Speed Test*"
             "*Sway*"
             "*TuneInRadio*"
-            "*Twitter*"                              # Twitte            "Microsoft.Office.OneNote"               # MS Office One Note
-            "Microsoft.Office.Sway"
+            "*Twitter*"                              # Twitter
             "*Viber*"
             "*WinZipUniversal*"
             "*Wunderlist*"
@@ -163,11 +156,11 @@ if ($confirm -eq "y") {
         Get-AppxPackage -AllUsers | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
-        
+
         # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
         reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
         reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
-        # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+                # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
         reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
         reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
         reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
@@ -202,12 +195,7 @@ if ($confirm -eq "y"){
 
 
 #Removes Live Tiles Bloatware
-
-$OS = Get-WmiObject -Class Win32_OperatingSystem
-$buildNumber = $OS.BuildNumber
-
-if ($buildNumber -lt 21996) {
-    Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
+Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output 'You are running Windows 10, the Start Menu layout will be reset'
@@ -271,11 +259,8 @@ if ($confirm -eq "y") {
 else {
     Write-Output "Start Menu Layout will not be reset."
 }
-} else {
-}
 
-
-#Microsoft Edge background tasks
+#Removes Microsoft Edge background tasks
 Remove-ItemProperty -Path "HKLM:Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-startup-boost" -Name "CommandLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}\Commands\on-logon-autolaunch" -Name "CommandLine"
@@ -633,12 +618,14 @@ If (!$Revert) {
 }
 Main
 
-# Services
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    $servicesAuto = @"
+    
+    function Stop-UnnecessaryServices
+	{
+		$servicesAuto = @"
 			"AudioSrv",
 			"AudioEndpointBuilder",
 			"BFE",
@@ -723,6 +710,10 @@ function Optimize-ServicesRunning() {
     param (
         [Switch] $Revert
     )
+
+    $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
+    $EnableServicesOnSSD = @("SysMain")
+
     # Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
@@ -737,6 +728,7 @@ function Optimize-ServicesRunning() {
         "RemoteAccess"                              # DEFAULT: Disabled  | Routing and Remote Access
         "RemoteRegistry"                            # DEFAULT: Disabled  | Remote Registry
         "RetailDemo"                                # DEFAULT: Manual    | The Retail Demo Service controls device activity while the device is in retail demo mode.
+        "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
         "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
         "AJRouter"
@@ -775,7 +767,7 @@ function Optimize-ServicesRunning() {
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
-        "Micro Star SCM"
+                "Micro Star SCM"
         "MSI_Center_Service"
         "MSI Foundation Service"
         "MSI_VoiceControl_Service"
@@ -820,7 +812,7 @@ function Optimize-ServicesRunning() {
         "AsusCertService"
         "FMAPOService"
         "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"        
+        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -893,31 +885,21 @@ function Optimize-ServicesRunning() {
         "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
         "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
         "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
-        "Killer Network Service"
 
     )
 
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
-
-        Set-ServiceStartup -Disabled -Services $ServicesToDisabled
-        Set-ServiceStartup -Manual -Services $ServicesToManual
+    
+    Set-ServiceStartup -Disabled -Services $ServicesToDisabled
+    Set-ServiceStartup -Manual -Services $ServicesToManual
 }
-function Main() {
-    # List all services:
-    #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
-
-    If (!$Revert) {
-        Optimize-ServicesRunning # Enable essential Services and Disable bloating Services
-    } Else {
-        Optimize-ServicesRunning -Revert
-    }
 }
 else {
     Write-Output "Useless services will not be disabled."
 }
 
-# Microsoft Store
+#Removes Microsoft Store
 Write-Output "Do you want to uninstall Microsoft Store?(y/n)"
 $confirm = Read-Host
 
@@ -931,7 +913,7 @@ if ($confirm -eq "y") {
 }
 
 
-# Microsoft Edge
+#Removes Microsoft Edge
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 
