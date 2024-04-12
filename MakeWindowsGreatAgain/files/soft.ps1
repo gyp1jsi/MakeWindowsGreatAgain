@@ -1,7 +1,5 @@
 # For those who don't rape Windows
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Soft)'
-
-# Pre-Installed Bloatware
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.3.0 - 2023.12.25 (Soft)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -26,10 +24,13 @@ if ($confirm -eq "y") {
             "Microsoft.Getstarted"
             "Microsoft.Messaging"
             "Microsoft.Microsoft3DViewer"
+            "Microsoft.MicrosoftOfficeHub"
             "Microsoft.MicrosoftPowerBIForWindows"
             "Microsoft.MicrosoftSolitaireCollection" # MS Solitaire
             "Microsoft.MixedReality.Portal"
             "Microsoft.NetworkSpeedTest"
+            "Microsoft.Office.OneNote"               # MS Office One Note
+            "Microsoft.Office.Sway"
             "Microsoft.OneConnect"
             "Microsoft.People"                       # People
             "Microsoft.MSPaint"                      # Paint 3D
@@ -148,27 +149,6 @@ if ($confirm -eq "y") {
         Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
-}
-
-
-#Removes Office related apps
-Write-Output "Do you want to remove Office-related apps? (y/n)"
-$confirm = Read-Host
-if ($confirm -eq "y"){
-    $OfficeApps = @(
-    "Microsoft.MicrosoftOfficeHub"
-    "Microsoft.Office.OneNote"               # MS Office One Note
-    "Microsoft.Office.Sway"
-    )
-    foreach ($App in $OfficeApps) {
-        Write-Verbose -Message ('Removing Package {0}' -f $App)
-        Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
-        Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
-    }
-
-} else {
-    Write-Output "Ok champ"
 }
 
 #Removes Microsoft Edge background tasks
@@ -539,10 +519,10 @@ ForEach ($Key in $KeysToDelete) {
     }
 }
 
-Write-Output "Do you want to disable and stop useless services? (y/n)"
+Write-Output "Do you want to disable and stop unuseful services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    Write-Output "The useless services will be removed."
+    Write-Output "The unuseful services will be removed."
     Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
@@ -566,6 +546,8 @@ function Optimize-ServicesRunning() {
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
         "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
         "dmwappushservice"                          # DEFAULT: Manual    | Device Management Wireless Application Protocol (WAP)
+        "Fax"                                       # DEFAULT: Manual    | Fax Service
+        "fhsvc"                                     # DEFAULT: Manual    | Fax History Service
         "GraphicsPerfSvc"                           # DEFAULT: Manual    | Graphics performance monitor service
         "HomeGroupListener"                         # NOT FOUND (Win 10+)| HomeGroup Listener
         "HomeGroupProvider"                         # NOT FOUND (Win 10+)| HomeGroup Provider
@@ -578,88 +560,6 @@ function Optimize-ServicesRunning() {
         "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
         "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
-        "AJRouter"
-        "AppVClient"
-        "AssignedAccessManagerSvc"
-        "cphs"
-        "cplspcon"
-        "DiagTrack"
-        "DialogBlockingService"
-        "esifsvc"
-        "ETDService"                                # In case of problems, enable again.
-        "HfcDisableService"
-        "HPAppHelperCap"
-        "HPDiagsCap"
-        "HPNetworkCap"
-        "HPOmenCap"
-        "HPSysInfoCap"
-        "HpTouchpointAnalyticsService"
-        "igccservice"
-        "igfxCUIService2.0.0.0"
-        "Intel(R) Capability Licensing Service TCP IP Interface"
-        "Intel(R) TPM Provisioning Service"
-        "IntelAudioService"
-        "jhi_service"
-        "LMS"
-        "MapsBroker"
-        "NetTcpPortSharing"
-        "NVDisplay.ContainerLocalSystem"            # In case you need NVIDIA Control Panel, enable again
-        "RemoteAccess"
-        "RemoteRegistry"
-        "RstMwService"
-        "RtkAudioUniversalService"
-        "shpamsvc"
-        "Surfshark Service"
-        "tzautoupdate"
-        "UevAgentService"
-        "WSearch"
-        "XTU3SERVICE"
-        "Micro Star SCM"
-        "MSI_Center_Service"
-        "MSI Foundation Service"
-        "MSI_VoiceControl_Service"
-        "Mystic_Light_Service"
-        "NahimicService"
-        "NortonSecurity"
-        "nsWscSvc"
-        "FvSvc"
-        "RtkAudioUniversalService"
-        "LightKeeperService"
-        "AASSvc"
-        "AcerLightningService"
-        "DtsApo4Service"
-        "Killer Analytics Service"
-        "KNDBWM"
-        "KAPSService"
-        "McAWFwk"
-        "McAPExe"
-        "mccspsvc"
-        "mfefire"
-        "ModuleCoreService"
-        "PEFService"
-        "mfemms"
-        "mfevtp"
-        "McpManagementService"
-        "TbtP2pShortcutService"
-        "AMD Crash Defender Service"
-        "AMD External Events Utility"
-        "ArmouryCrateControlInterface"
-        # "ArmouryCrateService"
-        "AsusAppService"
-        "LightingService"
-        "ASUSLinkNear"
-        "ASUSLinkRemote"
-        "ASUSOptimization"
-        "ASUSSoftwareManager"
-        "ASUSSwitch"
-        "ASUSSystemAnalysis"
-        "ASUSSystemDiagnosis"
-        "asus"
-        "asusm"
-        "AsusCertService"
-        "FMAPOService"
-        "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -687,8 +587,6 @@ function Optimize-ServicesRunning() {
         "wisvc"                          # DEFAULT: Manual    | Windows Insider Program Service
         "WMPNetworkSvc"                  # DEFAULT: Manual    | Windows Media Player Network Sharing Service
         "WpnService"                     # DEFAULT: Automatic | Windows Push Notification Services (WNS)
-        "Fax"
-        "fhsvc"
         # - Diagnostic Services
         "DPS"                            # DEFAULT: Automatic | Diagnostic Policy Service
         "WdiServiceHost"                 # DEFAULT: Manual    | Diagnostic Service Host
@@ -714,25 +612,6 @@ function Optimize-ServicesRunning() {
         # - 3rd Party Services
         "gupdate"                        # DEFAULT: Automatic | Google Update Service
         "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
-    # FROM MAKEWINDOWSGREATAGAIN 1.2.1
-        "EventSystem"                    # DEFAULT: Automatic | COM+ Event System
-        "DusmSvc"                        # DEFAULT: Automatic | Data Usage
-        "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
-        "nsi"                            # DEFAULT: Automatic | Network Store Interface Service
-        "ShellHWDetection"               # DEFAULT: Automatic | Shell Hardware Detection
-        "SysMain"                        # DEFAULT: Automatic | SysMain
-        "SENS"                           # DEFAULT: Automatic | System Event Notification Service
-        "EventLog"                       # DEFAULT: Automatic | Windows Event Log
-        "LanmanWorkstation"              # DEFAULT: Automatic | Workstation
-        "Themes"                         # DEFAULT: Automatic | Themes
-        "ProfSvc"                        # DEFAULT: Automatic | User Profile Service
-        "SamSs"                          # DEFAULT: Automatic | Security Acoounts Manager
-        "CDPSvc"                         # DEFAULT: Automatic (Delayed Start) | Connected Devices Platform Service
-        "edgeupdate"                     # DEFAULT: Automatic (Delayed Start) | Microsoft Edge Update Service (edgeupdate)
-        "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
-        "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
-        "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
-        "Killer Network Service"
     )
 
     Write-Title -Text "Services tweaks"
@@ -770,7 +649,7 @@ function Main() {
 Main
 }
 else {
-    Write-Output "Useless services will not be disabled."
+    Write-Output "Unuseful services will not be disabled."
 }
 
 Write-Output "Do you want to disable Cortana? (y/n)"

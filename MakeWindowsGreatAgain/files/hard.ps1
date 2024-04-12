@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (rev 2024.03.22) (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.3.0 - 2023.12.25 (Hard)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -24,10 +24,13 @@ if ($confirm -eq "y") {
             "Microsoft.Getstarted"
             "Microsoft.Messaging"
             "Microsoft.Microsoft3DViewer"
+            "Microsoft.MicrosoftOfficeHub"
             "Microsoft.MicrosoftPowerBIForWindows"
             "Microsoft.MicrosoftSolitaireCollection" # MS Solitaire
             "Microsoft.MixedReality.Portal"
             "Microsoft.NetworkSpeedTest"
+            "Microsoft.Office.OneNote"               # MS Office One Note
+            "Microsoft.Office.Sway"
             "Microsoft.OneConnect"
             "Microsoft.People"                       # People
             "Microsoft.MSPaint"                      # Paint 3D
@@ -156,45 +159,10 @@ if ($confirm -eq "y") {
         Get-AppxPackage -AllUsers | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
-
-        # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
-        reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
-        reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
-                # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-        reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
-        reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebar\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /ve /d URL:ms-gamebarservices 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /v "URL Protocol" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebarservices /f /v "NoOpenWith" /d "" 2>&1 >''
-        reg add HKCR\ms-gamebarservices\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
 
-#Removes Office related apps
-Write-Output "Do you want to remove Office-related apps? (y/n)"
-$confirm = Read-Host
-if ($confirm -eq "y"){
-    $OfficeApps = @(
-    "Microsoft.MicrosoftOfficeHub"
-    "Microsoft.Office.OneNote"               # MS Office One Note
-    "Microsoft.Office.Sway"
-    )
-    foreach ($App in $OfficeApps) {
-        Write-Verbose -Message ('Removing Package {0}' -f $App)
-        Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
-        Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
-    }
-
-} else {
-    Write-Output "Ok champ"
-}
-
-
-#Removes Live Tiles Bloatware
 Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -767,52 +735,6 @@ function Optimize-ServicesRunning() {
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
-                "Micro Star SCM"
-        "MSI_Center_Service"
-        "MSI Foundation Service"
-        "MSI_VoiceControl_Service"
-        "Mystic_Light_Service"
-        "NahimicService"
-        "NortonSecurity"
-        "nsWscSvc"
-        "FvSvc"
-        "RtkAudioUniversalService"
-        "LightKeeperService"
-        "AASSvc"
-        "AcerLightningService"
-        "DtsApo4Service"
-        "Killer Analytics Service"
-        "KNDBWM"
-        "KAPSService"
-        "McAWFwk"
-        "McAPExe"
-        "mccspsvc"
-        "mfefire"
-        "ModuleCoreService"
-        "PEFService"
-        "mfemms"
-        "mfevtp"
-        "McpManagementService"
-        "TbtP2pShortcutService"
-        "AMD Crash Defender Service"
-        "AMD External Events Utility"
-        "ArmouryCrateControlInterface"
-        "ArmouryCrateService"
-        "AsusAppService"
-        "LightingService"
-        "ASUSLinkNear"
-        "ASUSLinkRemote"
-        "ASUSOptimization"
-        "ASUSSoftwareManager"
-        "ASUSSwitch"
-        "ASUSSystemAnalysis"
-        "ASUSSystemDiagnosis"
-        "asus"
-        "asusm"
-        "AsusCertService"
-        "FMAPOService"
-        "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -890,10 +812,37 @@ function Optimize-ServicesRunning() {
 
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
-    
-    Set-ServiceStartup -Disabled -Services $ServicesToDisabled
+
+    If ($Revert) {
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
+        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
+    } Else {
+        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
+    }
+
+    Write-Section -Text "Enabling services from Windows"
+
+    If ($IsSystemDriveSSD -or $Revert) {
+        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
+        Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
+    }
+
     Set-ServiceStartup -Manual -Services $ServicesToManual
 }
+
+function Main() {
+    # List all services:
+    #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
+
+    If (!$Revert) {
+        Optimize-ServicesRunning # Enable essential Services and Disable bloating Services
+    } Else {
+        Optimize-ServicesRunning -Revert
+    }
+}
+
+Main
 }
 else {
     Write-Output "Useless services will not be disabled."
