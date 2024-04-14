@@ -813,6 +813,7 @@ function Optimize-ServicesRunning() {
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
 
+    Set-ServiceStartup -Manual -Services $ServicesToManual
     If ($Revert) {
         Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
         $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
@@ -832,8 +833,6 @@ function Optimize-ServicesRunning() {
         $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on Windows 11 ..." }
         Set-ServiceStartup -Automatic -Services $EnableServicesOnWindows11 -CustomMessage $CustomMessage
     }
-
-    Set-ServiceStartup -Manual -Services $ServicesToManual
 }
 
 function Main() {
