@@ -1,9 +1,6 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Extreme)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.5.0 - 2024.04.14 (Extreme)'
 
-Write-Host "WARNING: This mode is experimental and not suitable for everyday users. Do you still want to continue? (yes/no)"
-$confirm = Read-Host
-if ($confirm -eq "yes") {
-    Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
+Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
 if ($confirm -eq "y") {
@@ -809,6 +806,7 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
     Set-ServiceStartup -Manual -Services $ServicesToManual
 }
 
+Main
 }
 else {
     Write-Output "Useless services will not be disabled."
@@ -1405,8 +1403,4 @@ else {
     Write-Output "Cortana will not be disabled."
 }
 
-} else {
-    Write-Host "Understandable. Have a great day."
-    timeout /t 5
-}
 

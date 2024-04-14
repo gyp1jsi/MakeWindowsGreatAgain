@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.3.0 - 2023.12.25 (Hard)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.5.0 - 2024.04.14 (Hard)'
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -24,13 +24,10 @@ if ($confirm -eq "y") {
             "Microsoft.Getstarted"
             "Microsoft.Messaging"
             "Microsoft.Microsoft3DViewer"
-            "Microsoft.MicrosoftOfficeHub"
             "Microsoft.MicrosoftPowerBIForWindows"
             "Microsoft.MicrosoftSolitaireCollection" # MS Solitaire
             "Microsoft.MixedReality.Portal"
             "Microsoft.NetworkSpeedTest"
-            "Microsoft.Office.OneNote"               # MS Office One Note
-            "Microsoft.Office.Sway"
             "Microsoft.OneConnect"
             "Microsoft.People"                       # People
             "Microsoft.MSPaint"                      # Paint 3D
@@ -71,7 +68,6 @@ if ($confirm -eq "y") {
             "*COOKINGFEVER*"
             "*CyberLinkMediaSuiteEssentials*"
             "*DisneyMagicKingdoms*"
-            "*Dolby*"                                # Dolby Products (Like Atmos)
             "*DrawboardPDF*"
             "*Duolingo-LearnLanguagesforFree*"       # Duolingo
             "*EclipseManager*"
@@ -159,10 +155,45 @@ if ($confirm -eq "y") {
         Get-AppxPackage -AllUsers | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
+
+        # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
+        reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
+        reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
+        # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+        reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /ve /d URL:ms-gamebarservices 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
 
+#Removes Office related apps
+Write-Output "Do you want to remove Office-related apps? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    $OfficeApps = @(
+    "Microsoft.MicrosoftOfficeHub"
+    "Microsoft.Office.OneNote"               # MS Office One Note
+    "Microsoft.Office.Sway"
+    )
+    foreach ($App in $OfficeApps) {
+        Write-Verbose -Message ('Removing Package {0}' -f $App)
+        Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
+        Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+    }
+
+} else {
+    Write-Output "Ok champ"
+}
+
+
+#Removes Live Tiles Bloatware
 Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -590,7 +621,10 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    $servicesAuto = @(
+    
+    function Stop-UnnecessaryServices
+	{
+		$servicesAuto = @"
 			"AudioSrv",
 			"AudioEndpointBuilder",
 			"BFE",
@@ -650,7 +684,7 @@ if ($confirm -eq "y") {
 			"vm3dservice",
 			"webthreatdefusersvc_dc2a4",
 			"wscsvc"
-)		
+"@		
 	
 		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
 		foreach($service in $allServices)
@@ -735,6 +769,53 @@ function Optimize-ServicesRunning() {
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
+        #MSI bloatware - taken from MakeWindowsGreatAgain 1.4.0
+        "Micro Star SCM"
+        "MSI_Center_Service"
+        "MSI Foundation Service"
+        "MSI_VoiceControl_Service"
+        "Mystic_Light_Service"
+        "NahimicService"
+        "NortonSecurity"
+        "nsWscSvc"
+        "FvSvc"
+        "RtkAudioUniversalService"
+        "LightKeeperService"
+        "AASSvc"
+        "AcerLightningService"
+        "DtsApo4Service"
+        "Killer Analytics Service"
+        "KNDBWM"
+        "KAPSService"
+        "McAWFwk"
+        "McAPExe"
+        "mccspsvc"
+        "mfefire"
+        "ModuleCoreService"
+        "PEFService"
+        "mfemms"
+        "mfevtp"
+        "McpManagementService"
+        "TbtP2pShortcutService"
+        "AMD Crash Defender Service"
+        "AMD External Events Utility"
+        "ArmouryCrateControlInterface"
+        "ArmouryCrateService"
+        "AsusAppService"
+        "LightingService"
+        "ASUSLinkNear"
+        "ASUSLinkRemote"
+        "ASUSOptimization"
+        "ASUSSoftwareManager"
+        "ASUSSwitch"
+        "ASUSSystemAnalysis"
+        "ASUSSystemDiagnosis"
+        "asus"
+        "asusm"
+        "AsusCertService"
+        "FMAPOService"
+        "mc-wps-secdashboardservice"
+        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -824,7 +905,7 @@ function Optimize-ServicesRunning() {
 
     Write-Section -Text "Enabling services from Windows"
 
-    If ($IsSystemDriveSSD -or $Revert) {
+     If ($IsSystemDriveSSD -or $Revert) {
         $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
         Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
     }
@@ -847,7 +928,7 @@ function Main() {
 }
 
 Main
-
+}
 else {
     Write-Output "Useless services will not be disabled."
 }
