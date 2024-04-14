@@ -840,7 +840,7 @@ function Main() {
 }
 
 Main
-}
+
 else {
     Write-Output "Useless services will not be disabled."
 }
