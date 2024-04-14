@@ -809,7 +809,6 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
     Set-ServiceStartup -Manual -Services $ServicesToManual
 }
 
-Main
 }
 else {
     Write-Output "Useless services will not be disabled."

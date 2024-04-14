@@ -61,6 +61,9 @@ ________________________________________________________________________________
 | To "zBloodwyn": YOUR BOOTLEG SCUMMY CTT SCRIPT BULLSHIT IS ABOUT TO END SOON!              | 
 | You are still in time to end your circus and get an honest job, instead of scamming people.|
 | But be quick, I AM COMING.                                                                 |
+|                                                                                            |
+| To "cucchiaio": dude wtf is wrong with you, take some meds and change your username        |
+| (currently: "gypijs1")                                                                     |
 |____________________________________________________________________________________________|
 
 1] Hard Mode (Recommended)
