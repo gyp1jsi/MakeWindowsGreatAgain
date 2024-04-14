@@ -142,9 +142,7 @@ if ($confirm -eq "y") {
             # [DIY] Common Streaming services
     
             "*Netflix*"                        # Netflix
-            "*SpotifyMusic*"                   # Spotify
             "*Spotify*"
-            "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work"
         )
         foreach ($App in $AppXApps) {
             Write-Verbose -Message ('Removing Package {0}' -f $App)
