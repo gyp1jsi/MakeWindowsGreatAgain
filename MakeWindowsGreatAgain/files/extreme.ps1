@@ -1,7 +1,5 @@
-# For those who don't rape Windows
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.5.0 - 2024.04.14 (Soft)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.5.0 - 2024.04.14 (Extreme)'
 
-# Pre-Installed Bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -20,16 +18,20 @@ if ($confirm -eq "y") {
             "Microsoft.BingSports"                   # Sports
             "Microsoft.BingTranslator"               # Translator
             "Microsoft.BingTravel"                   # Travel
+            "Microsoft.BingWeather"                  # Weather
             "Microsoft.CommsPhone"
             "Microsoft.ConnectivityStore"
             "Microsoft.GetHelp"
             "Microsoft.Getstarted"
             "Microsoft.Messaging"
             "Microsoft.Microsoft3DViewer"
+            "Microsoft.MicrosoftOfficeHub"
             "Microsoft.MicrosoftPowerBIForWindows"
             "Microsoft.MicrosoftSolitaireCollection" # MS Solitaire
             "Microsoft.MixedReality.Portal"
             "Microsoft.NetworkSpeedTest"
+            "Microsoft.Office.OneNote"               # MS Office One Note
+            "Microsoft.Office.Sway"
             "Microsoft.OneConnect"
             "Microsoft.People"                       # People
             "Microsoft.MSPaint"                      # Paint 3D
@@ -37,10 +39,19 @@ if ($confirm -eq "y") {
             "Microsoft.SkypeApp"                     # Skype (Who still uses Skype? Use Discord)
             "Microsoft.Todos"                        # Microsoft To Do
             "Microsoft.Wallet"
+            "Microsoft.Whiteboard"                   # Microsoft Whiteboard
+            "Microsoft.WindowsAlarms"                # Alarms
             "microsoft.windowscommunicationsapps"
             "Microsoft.WindowsMaps"                  # Maps
+            "Microsoft.WindowsPhone"
             "Microsoft.WindowsReadingList"
+            "Microsoft.WindowsSoundRecorder"         # Windows Sound Recorder
+            "Microsoft.XboxApp"                      # Xbox Console Companion
+            "Microsoft.YourPhone"                    # Your Phone
+            "Microsoft.ZuneVideo"                    # Movies & TV
+            "Microsoft.GamingApp"			         # Xbox App
             "MicrosoftCorporationII.MicrosoftFamily" # Parental Control (no kids allowed here)
+            "*Microsoft.XboxGamingOverlay*"          # Discord is better
     
             # Default Windows 11 apps
             "Clipchamp.Clipchamp"		     	     # Clipchamp (Shitty Video Editor)
@@ -61,6 +72,7 @@ if ($confirm -eq "y") {
             "*COOKINGFEVER*"
             "*CyberLinkMediaSuiteEssentials*"
             "*DisneyMagicKingdoms*"
+            "*Dolby*"                                # Dolby Products (Like Atmos)
             "*DrawboardPDF*"
             "*Duolingo-LearnLanguagesforFree*"       # Duolingo
             "*EclipseManager*"
@@ -102,6 +114,8 @@ if ($confirm -eq "y") {
             "*Disney*"
             "*Disney.37853FC22B2CE*"                #If the above does not work
     
+            # Apps which other apps depend on
+            "Microsoft.Advertising.Xaml"
     
             # SAMSUNG Bloat
             #"SAMSUNGELECTRONICSCO.LTD.SamsungSettings1.2"          # Allow user to Tweak some hardware settings
@@ -123,6 +137,7 @@ if ($confirm -eq "y") {
             "4AE8B7C2.BOOKING.COMPARTNERAPPSAMSUNGEDITION"
     
             "Microsoft.MicrosoftStickyNotes"    # Sticky Notes
+            "Microsoft.WindowsCamera"           # Camera
             "Microsoft.WindowsFeedbackHub"      # Feedback Hub
     
             # [DIY] Common Streaming services
@@ -149,24 +164,69 @@ if ($confirm -eq "y") {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
 
-#Removes Office related apps
-Write-Output "Do you want to remove Office-related apps? (y/n)"
+Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
 $confirm = Read-Host
-if ($confirm -eq "y"){
-    $OfficeApps = @(
-    "Microsoft.MicrosoftOfficeHub"
-    "Microsoft.Office.OneNote"               # MS Office One Note
-    "Microsoft.Office.Sway"
-    )
-    foreach ($App in $OfficeApps) {
-        Write-Verbose -Message ('Removing Package {0}' -f $App)
-        Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
-        Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+if ($confirm -eq "y") {
+    Write-Output 'You are running Windows 10, the Start Menu layout will be reset'
+    timeout /t 2
+    $START_MENU_LAYOUT = @"
+    <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
+        <LayoutOptions StartTileGroupCellWidth="6" />
+        <DefaultLayoutOverride>
+            <StartLayoutCollection>
+                <defaultlayout:StartLayout GroupCellWidth="6" />
+            </StartLayoutCollection>
+        </DefaultLayoutOverride>
+    </LayoutModificationTemplate>
+"@
+
+    $layoutFile="C:\Windows\StartMenuLayout.xml"
+
+    #Delete layout file if it already exists
+    If(Test-Path $layoutFile) {
+        Remove-Item $layoutFile
     }
 
-} else {
-    Write-Output "Ok champ"
+    #Creates the blank layout file
+    $START_MENU_LAYOUT | Out-File $layoutFile -Encoding ASCII
+
+    $regAliases = @("HKLM", "HKCU")
+
+    #Assign the start layout and force it to apply with "LockedStartLayout" at both the machine and user level
+    foreach ($regAlias in $regAliases) {
+        $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
+        $keyPath = $basePath + "\Explorer" 
+        IF(!(Test-Path -Path $keyPath)) { 
+            New-Item -Path $basePath -Name "Explorer"
+        }
+        Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 1
+        Set-ItemProperty -Path $keyPath -Name "StartLayoutFile" -Value $layoutFile
+    }
+
+    #Restart Explorer, open the start menu (necessary to load the new layout), and give it a few seconds to process
+    Stop-Process -name explorer
+    Start-Sleep -s 5
+    $wshell = New-Object -ComObject wscript.shell; $wshell.SendKeys('^{ESCAPE}')
+    Start-Sleep -s 5
+
+    #Enable the ability to pin items again by disabling "LockedStartLayout"
+    foreach ($regAlias in $regAliases) {
+        $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
+        $keyPath = $basePath + "\Explorer" 
+        Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 0
+    }
+
+    #Restart Explorer and delete the layout file
+    Stop-Process -name explorer
+
+    # Uncomment the next line to make clean start menu default for all new users
+    Import-StartLayout -LayoutPath $layoutFile -MountPath $env:SystemDrive\
+
+    Remove-Item $layoutFile
+}
+
+else {
+    Write-Output "Start Menu Layout will not be reset."
 }
 
 #Removes Microsoft Edge background tasks
@@ -404,25 +464,6 @@ function Optimize-Privacy() {
     # [@] (4 = Automatically download and schedule installation, 5 = Automatic Updates is required and users can configure it)
     Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "AUOptions" -Type DWord -Value 2
 
-    Write-Status -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Automatic Updates..."
-    # [@] (0 = Enable Automatic Updates, 1 = Disable Automatic Updates)
-    Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "NoAutoUpdate" -Type DWord -Value $Zero
-
-    Write-Status -Types "+", $TweakType -Status "Setting Scheduled Day to Every day..."
-    # [@] (0 = Every day, 1~7 = The days of the week from Sunday (1) to Saturday (7) (Only valid if AUOptions = 4))
-    Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "ScheduledInstallDay" -Type DWord -Value 0
-
-    Write-Status -Types "-", $TweakType -Status "Setting Scheduled time to 03h00m..."
-    # [@] (0-23 = The time of day in 24-hour format)
-    Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "ScheduledInstallTime" -Type DWord -Value 3
-
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Automatic Reboot after update..."
-    # [@] (0 = Enable Automatic Reboot after update, 1 = Disable Automatic Reboot after update)
-    Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "NoAutoRebootWithLoggedOnUsers" -Type DWord -Value $One
-
-    Write-Status -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Change Windows Updates to 'Notify to schedule restart'..."
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "UxOption" -Type DWord -Value $One
-
     Write-Status -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Restricting Windows Update P2P downloads for Local Network only..."
     If (!(Test-Path "$PathToLMDeliveryOptimizationCfg")) {
         New-Item -Path "$PathToLMDeliveryOptimizationCfg" -Force | Out-Null
@@ -491,13 +532,13 @@ function Optimize-Privacy() {
     }
     Set-ItemProperty -Path "$PathToLMPoliciesToWifi\AllowAutoConnectToWiFiSenseHotspots" -Name "value" -Type DWord -Value $Zero
 }
-}
+
 
 else {
     Write-Output "Windows will keep looking into your PC for no reason."
 }
 
-Write-Caption "Deleting useless registry keys... if you see red lines it's because they already do not exist :)"
+Write-Caption "Deleting useless registry keys..."
 $KeysToDelete = @(
     # Remove Background Tasks
     "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\46928bounde.EclipseManager_2.2.4.51_neutral__a5h4egax66k6y"
@@ -537,11 +578,94 @@ ForEach ($Key in $KeysToDelete) {
     }
 }
 
+function Main() {
+If (!$Revert) {
+    Optimize-Privacy # Disable Registries that causes slowdowns and privacy invasion
+} Else {
+    Optimize-Privacy -Revert
+}
+}
+Main
+
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
+    
+    function Stop-UnnecessaryServices
+	{
+		$servicesAuto = @"
+			"AudioSrv",
+			"AudioEndpointBuilder",
+			"BFE",
+			"BrokerInfrastructure",
+			"CDPSvc",
+			"CDPUserSvc_dc2a4",
+			"CoreMessagingRegistrar",
+			"CryptSvc",
+			"DPS",
+			"DcomLaunch",
+			"Dhcp",
+			"DispBrokerDesktopSvc",
+			"Dnscache",
+			"DoSvc",
+			"DusmSvc",
+			"EventLog",
+			"EventSystem",
+			"FontCache",
+			"LSM",
+			"LanmanServer",
+			"LanmanWorkstation",
+			"MapsBroker",
+			"MpsSvc",
+			"OneSyncSvc_dc2a4",
+			"Power",
+			"ProfSvc",
+			"RpcEptMapper",
+			"RpcSs",
+			"SCardSvr",
+			"SENS",
+			"SamSs",
+			"Schedule",
+			"SgrmBroker",
+			"ShellHWDetection",
+			"Spooler",
+			"SystemEventsBroker",
+			"TextInputManagementService",
+			"Themes",
+			"TrkWks",
+			"UserManager",
+			"VGAuthService",
+			"VMTools",
+			"WSearch",
+			"Wcmsvc",
+			"WinDefend",
+			"Winmgmt",
+			"WlanSvc",
+			"WpnService",
+			"WpnUserService_dc2a4",
+			"cbdhsvc_dc2a4",
+			"gpsvc",
+			"iphlpsvc",
+			"mpssvc",
+			"nsi",
+			"sppsvc",
+			"tiledatamodelsvc",
+			"vm3dservice",
+			"webthreatdefusersvc_dc2a4",
+			"wscsvc"
+"@		
+	
+		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
+		foreach($service in $allServices)
+		{
+			Stop-Service -Name $service.Name -PassThru
+			Set-Service $service.Name -StartupType Manual
+			"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
+		}
+	}
+        
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
 
@@ -550,16 +674,7 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
 # Adapted from: https://gist.github.com/matthewjberger/2f4295887d6cb5738fa34e597f457b7f
 # Adapted from: https://github.com/Sycnex/Windows10Debloater
 
-function Optimize-ServicesRunning() {
-    [CmdletBinding()]
-    param (
-        [Switch] $Revert
-    )
-
-    $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
-    $EnableServicesOnSSD = @("SysMain")
-
-    # Services which will be totally disabled
+# Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
         "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
@@ -576,7 +691,6 @@ function Optimize-ServicesRunning() {
         "SysMain"                                   # DEFAULT: Automatic | SysMain / Superfetch (100% Disk usage on HDDs)
         "TrkWks"                                    # DEFAULT: Automatic | Distributed Link Tracking Client
         "WSearch"                                   # DEFAULT: Automatic | Windows Search (100% Disk usage on HDDs, dangerous on SSDs too)
-        #Taken from MakeWindowsGreatAgain 1.4.0
         "AJRouter"
         "AppVClient"
         "AssignedAccessManagerSvc"
@@ -613,52 +727,6 @@ function Optimize-ServicesRunning() {
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
-        "Micro Star SCM"
-        "MSI_Center_Service"
-        "MSI Foundation Service"
-        "MSI_VoiceControl_Service"
-        "Mystic_Light_Service"
-        "NahimicService"
-        "NortonSecurity"
-        "nsWscSvc"
-        "FvSvc"
-        "RtkAudioUniversalService"
-        "LightKeeperService"
-        "AASSvc"
-        "AcerLightningService"
-        "DtsApo4Service"
-        "Killer Analytics Service"
-        "KNDBWM"
-        "KAPSService"
-        "McAWFwk"
-        "McAPExe"
-        "mccspsvc"
-        "mfefire"
-        "ModuleCoreService"
-        "PEFService"
-        "mfemms"
-        "mfevtp"
-        "McpManagementService"
-        "TbtP2pShortcutService"
-        "AMD Crash Defender Service"
-        "AMD External Events Utility"
-        "ArmouryCrateControlInterface"
-        # "ArmouryCrateService"
-        "AsusAppService"
-        "LightingService"
-        "ASUSLinkNear"
-        "ASUSLinkRemote"
-        "ASUSOptimization"
-        "ASUSSoftwareManager"
-        "ASUSSwitch"
-        "ASUSSystemAnalysis"
-        "ASUSSystemDiagnosis"
-        "asus"
-        "asusm"
-        "AsusCertService"
-        "FMAPOService"
-        "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -686,7 +754,6 @@ function Optimize-ServicesRunning() {
         "wisvc"                          # DEFAULT: Manual    | Windows Insider Program Service
         "WMPNetworkSvc"                  # DEFAULT: Manual    | Windows Media Player Network Sharing Service
         "WpnService"                     # DEFAULT: Automatic | Windows Push Notification Services (WNS)
-        #Taken from MakeWindowsGreatAgain 1.4.0
         "Fax"
         "fhsvc"
         # - Diagnostic Services
@@ -714,7 +781,7 @@ function Optimize-ServicesRunning() {
         # - 3rd Party Services
         "gupdate"                        # DEFAULT: Automatic | Google Update Service
         "gupdatem"                       # DEFAULT: Manual    | Google Update Service²
-        # FROM MAKEWINDOWSGREATAGAIN 1.2.1
+    # FROM MAKEWINDOWSGREATAGAIN 1.2.1
         "EventSystem"                    # DEFAULT: Automatic | COM+ Event System
         "DusmSvc"                        # DEFAULT: Automatic | Data Usage
         "DispBrokerDesktopSvc"           # DEFAULT: Automatic | Display Policy Service
@@ -732,45 +799,583 @@ function Optimize-ServicesRunning() {
         "StorSvc"                        # DEFAULT: Automatic (Delayed Start) | Storage Service
         "CryptSvc"                       # DEFAULT: Automatic (Delayed Start) | Cryptographic Services
         "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
-        "Killer Network Service"
+
     )
-
-    Write-Title -Text "Services tweaks"
-    Write-Section -Text "Disabling services from Windows"
-
-    If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
-        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
-        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
-    } Else {
-        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
-    }
-
-    Write-Section -Text "Enabling services from Windows"
-
-    If ($IsSystemDriveSSD -or $Revert) {
-        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
-        Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
-    }
-
+    Write-Host "Disabling services... just wait."
+    Set-ServiceStartup -Disabled -Services $ServicesToDisabled
     Set-ServiceStartup -Manual -Services $ServicesToManual
-}
-
-function Main() {
-    # List all services:
-    #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
-
-    If (!$Revert) {
-        Optimize-ServicesRunning # Enable essential Services and Disable bloating Services
-    } Else {
-        Optimize-ServicesRunning -Revert
-    }
 }
 
 Main
 }
 else {
     Write-Output "Useless services will not be disabled."
+}
+
+#Removes Microsoft Store
+Write-Output "Do you want to uninstall Microsoft Store?(y/n)"
+$confirm = Read-Host
+
+if ($confirm -eq "y") {
+    Write-Output "Uninstalling Microsoft Store. AppX sideload and Winget will still be available."
+    Get-AppxPackage -Name Microsoft.WindowsStore -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+    Get-AppxPackage -Name Microsoft.StorePurchaseApp -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+    Get-AppxPackage -alluser *WindowsStore* | Remove-AppxPackage -ErrorAction SilentlyContinue
+} else {
+    Write-Output "Microsoft Store will not be uninstalled."
+}
+
+
+#Removes Microsoft Edge
+Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
+$confirm = Read-Host
+
+if ($confirm -eq "y") {
+    # Script Metadata
+# Created by AveYo, source: https://raw.githubusercontent.com/AveYo/fox/main/Edge_Removal.bat
+# Powershell Conversion and Refactor done by Chris Titus Tech
+
+# Initial Configuration
+$remove_win32 = @("Microsoft Edge", "Microsoft Edge Update")
+$remove_appx = @("MicrosoftEdge")
+$skip = @() # Optional: @("DevTools")
+
+$also_remove_webview = 0
+if ($also_remove_webview -eq 1) {
+    $remove_win32 += "Microsoft EdgeWebView"
+    $remove_appx += "WebExperience", "Win32WebViewHost"
+}
+
+# Administrative Privileges Check
+
+# Get the 'SetPrivilege' method from System.Diagnostics.Process type
+$setPrivilegeMethod = [System.Diagnostics.Process].GetMethod('SetPrivilege', [System.Reflection.BindingFlags]::NonPublic -bor [System.Reflection.BindingFlags]::Static)
+
+# List of privileges to set
+$privileges = @(
+    'SeSecurityPrivilege',
+    'SeTakeOwnershipPrivilege',
+    'SeBackupPrivilege',
+    'SeRestorePrivilege'
+)
+
+# Invoke the method for each privilege
+foreach ($privilege in $privileges) {
+    $setPrivilegeMethod.Invoke($null, @($privilege, 2))
+}
+
+# Edge Removal Procedures
+
+# Define processes to shut down
+$processesToShutdown = @(
+    'explorer', 'Widgets', 'widgetservice', 'msedgewebview2', 'MicrosoftEdge*', 'chredge',
+    'msedge', 'edge', 'msteams', 'msfamily', 'WebViewHost', 'Clipchamp'
+)
+
+# Kill explorer process
+Stop-Process -Name "explorer" -Force -ErrorAction SilentlyContinue
+
+# Kill the processes from the list
+$processesToShutdown | ForEach-Object {
+    Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue
+}
+
+# Set path for Edge executable
+$MS = ($env:ProgramFiles, ${env:ProgramFiles(x86)})[[Environment]::Is64BitOperatingSystem] + '\Microsoft\Edge\Application\msedge.exe'
+
+# Clean up certain registry entries
+Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\msedge.exe" -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\ie_to_edge_stub.exe" -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\microsoft-edge' -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\MSEdgeHTM' -Recurse -ErrorAction SilentlyContinue
+
+# Create new registry entries
+New-Item -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Name '(Default)' -Value "`"$MS`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
+
+New-Item -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Name '(Default)' -Value "`"$MS`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
+
+# Remove certain registry properties
+$registryPaths = @('HKLM:\SOFTWARE\Policies', 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node')
+$edgeProperties = @('InstallDefault', 'Install{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}', 'Install{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}')
+foreach ($path in $registryPaths) {
+    foreach ($prop in $edgeProperties) {
+        Remove-ItemProperty -Path "$path\Microsoft\EdgeUpdate" -Name $prop -Force -ErrorAction SilentlyContinue
+    }
+}
+
+$edgeupdate = 'Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}'
+$webvupdate = 'Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+$on_actions = @('on-os-upgrade', 'on-logon', 'on-logon-autolaunch', 'on-logon-startup-boost')
+$registryBases = @('HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\Wow6432Node')
+foreach ($base in $registryBases) {
+    foreach ($launch in $on_actions) {
+        Remove-Item -Path "$base\$edgeupdate\Commands\$launch" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "$base\$webvupdate\Commands\$launch" -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Clear specific registry keys
+$registryPaths = @('HKCU:', 'HKLM:')
+$nodes = @('', '\Wow6432Node')
+foreach ($regPath in $registryPaths) {
+    foreach ($node in $nodes) {
+        foreach ($i in $remove_win32) {
+            Remove-ItemProperty -Path "$regPath\SOFTWARE${node}\Microsoft\Windows\CurrentVersion\Uninstall\$i" -Name 'NoRemove' -Force -ErrorAction SilentlyContinue
+            New-Item -Path "$regPath\SOFTWARE${node}\Microsoft\EdgeUpdateDev" -Force | Out-Null
+            Set-ItemProperty -Path "$regPath\SOFTWARE${node}\Microsoft\EdgeUpdateDev" -Name 'AllowUninstall' -Value 1 -Type Dword -Force
+        }
+    }
+}
+
+# Locate setup.exe and ie_to_edge_stub.exe
+$foldersToSearch = @('LocalApplicationData', 'ProgramFilesX86', 'ProgramFiles') | ForEach-Object {
+    [Environment]::GetFolderPath($_)
+}
+
+$edges = @()
+$bhoFiles = @()
+
+foreach ($folder in $foldersToSearch) {
+    $bhoFiles += Get-ChildItem -Path "$folder\Microsoft\Edge*\ie_to_edge_stub.exe" -Recurse -ErrorAction SilentlyContinue
+
+    $edges += Get-ChildItem -Path "$folder\Microsoft\Edge*\setup.exe" -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -notlike '*EdgeWebView*' }
+}
+
+# Create directory and copy ie_to_edge_stub.exe to it
+$destinationDir = "$env:SystemDrive\Scripts"
+New-Item -Path $destinationDir -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+
+foreach ($bhoFile in $bhoFiles) {
+    if (Test-Path $bhoFile) {
+        try {
+            Copy-Item -Path $bhoFile -Destination "$destinationDir\ie_to_edge_stub.exe" -Force
+        } catch { }
+    }
+}
+
+## Work on Appx Removals
+
+# Retrieve AppX provisioned packages and all AppX packages
+$provisioned = Get-AppxProvisionedPackage -Online
+$appxpackage = Get-AppxPackage -AllUsers
+
+# Initialize empty array for EndOfLife packages
+$eol = @()
+
+# Define user SIDs and retrieve them from the registry
+$store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
+$users = @('S-1-5-18')
+if (Test-Path $store) {
+    $users += (Get-ChildItem $store -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like '*S-1-5-21*' }).PSChildName
+}
+
+# Process AppX packages for removal
+foreach ($choice in $remove_appx) {
+    if ([string]::IsNullOrWhiteSpace($choice)) { continue }
+
+    # Process provisioned packages
+    $provisioned | Where-Object { $_.PackageName -like "*$choice*" } | ForEach-Object {
+        if ($skip -Contains $_.PackageName) { return }
+
+        $PackageName = $_.PackageName
+        $PackageFamilyName = ($appxpackage | Where-Object { $_.Name -eq $_.DisplayName }).PackageFamilyName 
+
+        # Add registry entries
+        New-Item -Path "$store\Deprovisioned\$PackageFamilyName" -Force -ErrorAction SilentlyContinue | Out-Null
+        $users | ForEach-Object {
+            New-Item -Path "$store\EndOfLife\$_\$PackageName" -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+        $eol += $PackageName
+
+        # Modify non-removable app policy and remove package
+        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 | Out-Null
+        Remove-AppxProvisionedPackage -PackageName $PackageName -Online -AllUsers | Out-Null
+    }
+
+    # Process all AppX packages
+    $appxpackage | Where-Object { $_.PackageFullName -like "*$choice*" } | ForEach-Object {
+        if ($skip -Contains $_.PackageFullName) { return }
+
+        $PackageFullName = $_.PackageFullName
+
+        # Add registry entries
+        New-Item -Path "$store\Deprovisioned\$_.PackageFamilyName" -Force -ErrorAction SilentlyContinue | Out-Null
+        $users | ForEach-Object {
+            New-Item -Path "$store\EndOfLife\$_\$PackageFullName" -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+        $eol += $PackageFullName
+
+        # Modify non-removable app policy and remove package
+        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 | Out-Null
+        Remove-AppxPackage -Package $PackageFullName -AllUsers | Out-Null
+    }
+}
+
+## Run Edge setup uninstaller
+
+foreach ($setup in $edges) {
+    if (Test-Path $setup) {
+        $target = if ($setup -like '*EdgeWebView*') { "--msedgewebview" } else { "--msedge" }
+        
+        $removalArgs = "--uninstall $target --system-level --verbose-logging --force-uninstall"
+        
+        Write-Host "$setup $removalArgs"
+        
+        try {
+            Start-Process -FilePath $setup -ArgumentList $removalArgs -Wait
+        } catch {
+            # You may want to add logging or other error handling here.
+        }
+        
+        while ((Get-Process -Name 'setup', 'MicrosoftEdge*' -ErrorAction SilentlyContinue).Path -like '*\Microsoft\Edge*') {
+            Start-Sleep -Seconds 3
+        }
+    }
+}
+
+## Cleanup
+
+# Define necessary paths and variables
+$edgePaths = $env:ProgramFiles, ${env:ProgramFiles(x86)}
+$appDataPath = [Environment]::GetFolderPath('ApplicationData')
+
+# Uninstall Microsoft Edge Update
+foreach ($path in $edgePaths) {
+    $edgeUpdateExe = "$path\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe"
+    if (Test-Path $edgeUpdateExe) {
+        Write-Host $edgeUpdateExe /uninstall
+        Start-Process -FilePath $edgeUpdateExe -ArgumentList '/uninstall' -Wait
+        while ((Get-Process -Name 'setup','MicrosoftEdge*' -ErrorAction SilentlyContinue).Path -like '*\Microsoft\Edge*') {
+            Start-Sleep -Seconds 3
+        }
+        if ($also_remove_webview -eq 1) {
+            foreach ($regPath in 'HKCU:', 'HKLM:') {
+                foreach ($node in '', '\Wow6432Node') {
+                    Remove-Item -Path "$regPath\SOFTWARE$node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update" -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
+            Remove-Item -Path "$path\Microsoft\EdgeUpdate" -Recurse -Force -ErrorAction SilentlyContinue
+            Unregister-ScheduledTask -TaskName 'MicrosoftEdgeUpdate*' -Confirm:$false -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+# Remove Edge shortcuts
+Remove-Item -Path "$appDataPath\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Tombstones\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$appDataPath\Microsoft\Internet Explorer\Quick Launch\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+
+# Revert settings related to Microsoft Edge
+foreach ($sid in $users) {
+    foreach ($packageName in $eol) {
+        Remove-Item -Path "$store\EndOfLife\$sid\$packageName" -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Set policies to prevent unsolicited reinstalls of Microsoft Edge
+$registryPaths = @('HKLM:\SOFTWARE\Policies', 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node')
+$edgeUpdatePolicies = @{
+    'InstallDefault'                     = 0;
+    'Install{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}' = 0;
+    'Install{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}' = 1;
+    'DoNotUpdateToEdgeWithChromium'      = 1;
+}
+
+foreach ($path in $registryPaths) {
+    New-Item -Path "$path\Microsoft\EdgeUpdate" -Force -ErrorAction SilentlyContinue | Out-Null
+    foreach ($policy in $edgeUpdatePolicies.GetEnumerator()) {
+        Set-ItemProperty -Path "$path\Microsoft\EdgeUpdate" -Name $policy.Key -Value $policy.Value -Type Dword -Force
+    }
+}
+
+$edgeUpdateActions = @('on-os-upgrade', 'on-logon', 'on-logon-autolaunch', 'on-logon-startup-boost')
+$edgeUpdateClients = @(
+    'Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}',
+    'Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+)
+foreach ($client in $edgeUpdateClients) {
+    foreach ($action in $edgeUpdateActions) {
+        foreach ($regBase in 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\Wow6432Node') {
+            $regPath = "$regBase\$client\Commands\$action"
+            New-Item -Path $regPath -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path $regPath -Name 'CommandLine' -Value 'systray.exe' -Force
+        }
+    }
+}
+
+## Redirect Edge Shortcuts
+
+# Define Microsoft Edge Paths
+$MSEP = ($env:ProgramFiles, ${env:ProgramFiles(x86)})[[Environment]::Is64BitOperatingSystem] + '\Microsoft\Edge\Application'
+$IFEO = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options'
+$MIN = ('--headless', '--width 1 --height 1')[([environment]::OSVersion.Version.Build) -gt 25179]
+$CMD = "$env:systemroot\system32\conhost.exe $MIN"
+$DIR = "$env:SystemDrive\Scripts"
+
+# Setup Microsoft Edge Registry Entries
+New-Item -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge" -Name '(Default)' -Value 'URL:microsoft-edge' -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge" -Name 'URL Protocol' -Value '' -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge" -Name 'NoOpenWith' -Value '' -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Name '(Default)' -Value "`"$DIR\ie_to_edge_stub.exe`" %1" -Force
+
+# Setup MSEdgeHTM Registry Entries
+New-Item -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM" -Name 'NoOpenWith' -Value '' -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Name '(Default)' -Value "`"$DIR\ie_to_edge_stub.exe`" %1" -Force
+
+# Setup Image File Execution Options for Edge and Edge WebView
+$exeSettings = @(
+    @{ ExeName = 'ie_to_edge_stub.exe'; Debugger = "$CMD $DIR\OpenWebSearch.cmd"; FilterPath = "$DIR\ie_to_edge_stub.exe" },
+    @{ ExeName = 'msedge.exe'; Debugger = "$CMD $DIR\OpenWebSearch.cmd"; FilterPath = "$MSEP\msedge.exe" }
+)
+
+foreach ($setting in $exeSettings) {
+    New-Item -Path "$IFEO\$($setting.ExeName)\0" -Force | Out-Null
+    Set-ItemProperty -Path "$IFEO\$($setting.ExeName)" -Name 'UseFilter' -Value 1 -Type Dword -Force
+    Set-ItemProperty -Path "$IFEO\$($setting.ExeName)\0" -Name 'FilterFullPath' -Value $setting.FilterPath -Force
+    Set-ItemProperty -Path "$IFEO\$($setting.ExeName)\0" -Name 'Debugger' -Value $setting.Debugger -Force
+}
+
+# Write OpenWebSearch Batch Script
+$OpenWebSearch = @'
+@echo off
+@title OpenWebSearch Redux
+
+:: Minimize prompt
+for /f %%E in ('"prompt $E$S & for %%e in (1) do rem"') do echo;%%E[2t >nul 2>&1
+
+:: Get default browser from registry
+call :get_registry_value "HKCU\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice" ProgID DefaultBrowser
+if not defined DefaultBrowser (
+    echo Error: Failed to get default browser from registry.
+    pause
+    exit /b
+)
+if /i "%DefaultBrowser%" equ "MSEdgeHTM" (
+    echo Error: Default browser is set to Edge! Change it or remove OpenWebSearch script.
+    pause
+    exit /b
+)
+
+:: Get browser command line
+call :get_registry_value "HKCR\%DefaultBrowser%\shell\open\command" "" BrowserCommand
+if not defined BrowserCommand (
+    echo Error: Failed to get browser command from registry.
+    pause
+    exit /b
+)
+set Browser=& for %%i in (%BrowserCommand%) do if not defined Browser set "Browser=%%~i"
+
+:: Set fallback for Edge
+call :get_registry_value "HKCR\MSEdgeMHT\shell\open\command" "" FallBack
+set EdgeCommand=& for %%i in (%FallBack%) do if not defined EdgeCommand set "EdgeCommand=%%~i"
+
+:: Parse command line arguments and check for redirect or noop conditions
+set "URI=" & set "URL=" & set "NOOP=" & set "PassThrough=%EdgeCommand:msedge=edge%"
+set "CommandLineArgs=%CMDCMDLINE:"=``% "
+call :parse_arguments
+
+if defined NOOP (
+    if not exist "%PassThrough%" (
+        echo Error: PassThrough path doesn't exist.
+        pause
+        exit /b
+    )
+    start "" "%PassThrough%" %ParsedArgs%
+    exit /b
+)
+
+:: Decode URL
+call :decode_url
+if not defined URL (
+    echo Error: Failed to decode URL.
+    pause
+    exit /b
+)
+
+:: Open URL in default browser
+start "" "%Browser%" "%URL%"
+exit
+
+:: Functions
+
+:get_registry_value
+setlocal
+    set regQuery=reg query "%~1" /v %2 /z /se "," /f /e
+    if "%~2" equ "" set regQuery=reg query "%~1" /ve /z /se "," /f /e
+    for /f "skip=2 tokens=* delims=" %%V in ('%regQuery% 2^>nul') do set "result=%%V"
+    if defined result (set "result=%result:*)    =%") else (set "%~3=")
+    endlocal & set "%~3=%result%"
+exit /b
+
+:decode_url
+    :: Brute URL percent decoding
+    setlocal enabledelayedexpansion
+    set "decoded=%URL:!=}%"
+    call :brute_decode
+    endlocal & set "URL=%decoded%"
+exit /b
+
+:parse_arguments
+    :: Remove specific substrings from arguments
+    set "CommandLineArgs=%CommandLineArgs:*ie_to_edge_stub.exe`` =%"
+    set "CommandLineArgs=%CommandLineArgs:*ie_to_edge_stub.exe =%"
+    set "CommandLineArgs=%CommandLineArgs:*msedge.exe`` =%"
+    set "CommandLineArgs=%CommandLineArgs:*msedge.exe =%"
+
+    :: Remove any trailing spaces
+    if "%CommandLineArgs:~-1%"==" " set "CommandLineArgs=%CommandLineArgs:~0,-1%"
+
+    :: Check if arguments are a redirect or URL
+    set "RedirectArg=%CommandLineArgs:microsoft-edge=%"
+    set "UrlArg=%CommandLineArgs:http=%"
+    set "ParsedArgs=%CommandLineArgs:``="%"
+
+    :: Set NOOP flag if no changes to arguments
+    if "%CommandLineArgs%" equ "%RedirectArg%" (set NOOP=1) else if "%CommandLineArgs%" equ "%UrlArg%" (set NOOP=1)
+
+    :: Extract URL if present
+    if not defined NOOP (
+        set "URL=%CommandLineArgs:*microsoft-edge=%"
+        set "URL=http%URL:*http=%"
+        if "%URL:~-2%"=="``" set "URL=%URL:~0,-2%"
+    )
+exit /b
+
+
+:brute_decode
+    :: Brute force URL percent decoding
+
+    set "decoded=%decoded:%%20= %"
+    set "decoded=%decoded:%%21=!!"
+    set "decoded=%decoded:%%22="%""
+    set "decoded=%decoded:%%23=#%"
+    set "decoded=%decoded:%%24=$%"
+    set "decoded=%decoded:%%25=%%%"
+    set "decoded=%decoded:%%26=&%"
+    set "decoded=%decoded:%%27='%"
+    set "decoded=%decoded:%%28=(%"
+    set "decoded=%decoded:%%29=)%" 
+    set "decoded=%decoded:%%2A=*%"
+    set "decoded=%decoded:%%2B=+%"
+    set "decoded=%decoded:%%2C=,%"
+    set "decoded=%decoded:%%2D=-%"
+    set "decoded=%decoded:%%2E=.%"
+    set "decoded=%decoded:%%2F=/%"
+    :: ... Continue for other encodings ...
+
+    :: Correct any double percentage signs
+    set "decoded=%decoded:%%%%=%"
+
+exit /b
+
+
+
+'@
+[io.file]::WriteAllText("$DIR\OpenWebSearch.cmd", $OpenWebSearch)
+
+
+# Final Steps 
+
+# Retrieve the Edge_Removal property from the specified registry paths
+$userRegPaths = Get-ChildItem -Path 'Registry::HKEY_Users\S-1-5-21*\Volatile*' -ErrorAction SilentlyContinue
+$edgeRemovalPath = $userRegPaths | Get-ItemProperty -Name 'Edge_Removal' -ErrorAction SilentlyContinue
+
+# If the Edge_Removal property exists, remove it
+if ($edgeRemovalPath) {
+    Remove-ItemProperty -Path $edgeRemovalPath.PSPath -Name 'Edge_Removal' -Force -ErrorAction SilentlyContinue
+}
+
+# Ensure the explorer process is running
+if (-not (Get-Process -Name 'explorer' -ErrorAction SilentlyContinue)) {
+    Start-Process 'explorer'
+}
+    
+} else {
+    Write-Output "Microsoft Edge will not be uninstalled."
+}
+
+
+
+
+
+Write-Output "Do you want to optimize Task Scheduler tasks? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+    #Optimizes Task Scheduler tasks
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-scheduled-task-state.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+
+# Adapted from: https://youtu.be/qWESrvP_uU8
+# Adapted from: https://github.com/ChrisTitusTech/win10script
+# Adapted from: https://gist.github.com/matthewjberger/2f4295887d6cb5738fa34e597f457b7f
+# Adapted from: https://github.com/Sycnex/Windows10Debloater
+# Adapted from: https://github.com/kalaspuffar/windows-debloat
+
+function Optimize-TaskScheduler() {
+    [CmdletBinding()]
+    param (
+        [Switch] $Revert
+    )
+
+    # Adapted from: https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/rds-vdi-recommendations#task-scheduler
+    $DisableScheduledTasks = @(
+        "\Microsoft\Office\OfficeTelemetryAgentLogOn"
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack"
+        "\Microsoft\Office\Office 15 Subscription Heartbeat"
+        "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+        "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+        "\Microsoft\Windows\Application Experience\StartupAppTask"
+        "\Microsoft\Windows\Autochk\Proxy"
+        "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"         # Recommended state for VDI use
+        "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"       # Recommended state for VDI use
+        "\Microsoft\Windows\Customer Experience Improvement Program\Uploader"
+        "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"              # Recommended state for VDI use
+        "\Microsoft\Windows\Defrag\ScheduledDefrag"                                       # Recommended state for VDI use
+        "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
+        "\Microsoft\Windows\Location\Notifications"                                       # Recommended state for VDI use
+        "\Microsoft\Windows\Location\WindowsActionDialog"                                 # Recommended state for VDI use
+        "\Microsoft\Windows\Maps\MapsToastTask"                                           # Recommended state for VDI use
+        "\Microsoft\Windows\Maps\MapsUpdateTask"                                          # Recommended state for VDI use
+        "\Microsoft\Windows\Mobile Broadband Accounts\MNO Metadata Parser"                # Recommended state for VDI use
+        "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"                   # Recommended state for VDI use
+        "\Microsoft\Windows\Retail Demo\CleanupOfflineContent"                            # Recommended state for VDI use
+        "\Microsoft\Windows\Shell\FamilySafetyMonitor"                                    # Recommended state for VDI use
+        "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"                                # Recommended state for VDI use
+        "\Microsoft\Windows\Shell\FamilySafetyUpload"
+        "\Microsoft\Windows\Windows Media Sharing\UpdateLibrary"                          # Recommended state for VDI use
+    )
+
+    Write-Title -Text "Task Scheduler tweaks"
+    Write-Section -Text "Disabling Scheduled Tasks from Windows"
+
+    If ($Revert) {
+        Write-Status -Types "*", "TaskScheduler" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        $CustomMessage = { "Resetting the $ScheduledTask task as 'Ready' ..." }
+        Set-ScheduledTaskState -Ready -ScheduledTask $DisableScheduledTasks -CustomMessage $CustomMessage
+    } Else {
+        Set-ScheduledTaskState -Disabled -ScheduledTask $DisableScheduledTasks
+    }
+}
+
+function Main() {
+    # List all Scheduled Tasks:
+    #Get-ScheduledTask | Select-Object -Property State, TaskPath, TaskName, Description | Sort-Object State, TaskPath, TaskName | Out-GridView
+
+    If (!$Revert) {
+        Optimize-TaskScheduler # Disable Scheduled Tasks that causes slowdowns
+    } Else {
+        Optimize-TaskScheduler -Revert
+    }
+}
+
+Main
+}
+else {
+    Write-Output "Task Scheduler tasks will not be optimized."
 }
 
 Write-Output "Do you want to disable Cortana? (y/n)"
@@ -797,3 +1402,5 @@ if ($confirm -eq "y") {
 else {
     Write-Output "Cortana will not be disabled."
 }
+
+

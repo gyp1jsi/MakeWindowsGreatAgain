@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Menu)"
+$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 1.5.0 by CamiciaNera - 2024.04.14 (Menu)"
 Write-Output "DID YOU INSTALL EVERY UPDATE? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -54,7 +54,12 @@ do {
     switch ($key.KeyChar) {
         1 { & "$folderPath\$hardFile" }
         2 { & "$folderPath\$softFile" }
-        3 { & "$folderPath\$extremeFile" }
+        3 { & Write-Output "WARNING: THIS MODE IS EXPERIMENTAL SO IF SOMETHING BREAKS I'M NOT RESPONSIBLE. DO YOU WANT TO PROCEDE? (y/n)"
+            $confirm = Read-Host
+
+            if ($confirm -eq "y") {
+                & "$folderPath\$extremeFile" }
+            }
         q { break }
         default { Write-Host "Invalid option." }
     }
@@ -73,3 +78,9 @@ else {
 else {
     Write-Output "Run again the script when you'll have done everything."
 }
+
+
+
+
+
+
