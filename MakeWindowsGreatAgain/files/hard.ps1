@@ -679,6 +679,9 @@ function Optimize-ServicesRunning() {
     $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
     $EnableServicesOnSSD = @("SysMain")
 
+    $IsSystemWindows11 = $(Get-ComputerInfo | Select-Object -expand OsName) -match 11
+    $EnableServicesOnWindows11 = @("EventLog")
+
     # Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
@@ -810,10 +813,11 @@ function Optimize-ServicesRunning() {
     Write-Title -Text "Services tweaks"
     Write-Section -Text "Disabling services from Windows"
 
+    Set-ServiceStartup -Manual -Services $ServicesToManual
     If ($Revert) {
         Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
         $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
-        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
+        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD $EnableServicesOnWindows11 -CustomMessage $CustomMessage
     } Else {
         Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
     }
@@ -825,7 +829,10 @@ function Optimize-ServicesRunning() {
         Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
     }
 
-    Set-ServiceStartup -Manual -Services $ServicesToManual
+    If ($IsSystemWindows11 -or $Revert) {
+        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on Windows 11 ..." }
+        Set-ServiceStartup -Automatic -Services $EnableServicesOnWindows11 -CustomMessage $CustomMessage
+    }
 }
 
 function Main() {
