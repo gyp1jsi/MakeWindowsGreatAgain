@@ -1,5 +1,4 @@
-$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Menu)"
-
+$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 1.4.0 - 2024.03.16 (Menu)"
 Write-Output "DID YOU INSTALL EVERY UPDATE? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -22,57 +21,35 @@ $extremeFile = "extreme.ps1"
 
 # Avviare il file corrispondente al tasto premuto
 do {
-    Write-Host @"
-                                                                                        
-    _____     _____      _____      _____    ____         ____          ______   ____ 
-    ___|\    \   |\    \    /    /| ___|\    \  |    |       |    |     ___|\     \ |    |
-    /    /\    \  | \    \  /    / ||    |\    \ |    |       |    |    |    |\     \|    |
-    |    |  |____| |  \____\/    /  /|    | |    ||    |       |    |    |    |/____/||    |
-    |    |    ____  \ |    /    /  / |    |/____/||    | ____  |    | ___|    \|   | ||    |
-    |    |   |    |  \|___/    /  /  |    ||    |||    ||    | |    ||    \    \___|/ |    |
-    |    |   |_,  |      /    /  /   |    ||____|/|    ||    | |    ||    |\     \    |    |
-    |\ ___\___/  /|     /____/  /    |____|       |____||\____\|____||\ ___\|_____|   |____|
-    | |   /____ / |    |`    | /     |    |       |    || |    |    || |    |     |   |    |
-    \|___|    | /     |_____|/      |____|       |____| \|____|____| \|____|_____|   |____|
-     \( |____|/         )/           \(           \(      \(   )/      \(    )/       \(  
-      '   )/            '             '            '       '   '        '    '         '                                                                                 
-______________________________________________________________________________________________
-|                                                                                            |
-|                                           PRESENTS                                         |
-|                               /-----------------------------\                              |
-|                               | MakeWindowsGreatAgain 1.5.0 |                              |
-|                               \-----------------------------/                              |           
-|                                                                                            |
-|                                         Changelog:  
-|
-|
-|
-|
-|--------------------------------------------------------------------------------------------|
-| Personal notes:                                                                            |
-|                                                                                            |
-| To "Alessio il fai da te": Why do you keep defending yourself against evidence? What would |
-| you do if you were standing right in front of me? NOTHING. So, before saying anything about|
-| me, LOOK AT YOURSELF. Yes, we do not know each other, still you keep threatening of doxxing|
-| other people that, still, you do not know.                                                 |
-| Why do I call you badly? Because that's who you are. In the eyes of any user, you are just |
-| A RETARDED DOXXER.                                                                         |
-|                                                                                            |
-| To "zBloodwyn": YOUR BOOTLEG SCUMMY CTT SCRIPT BULLSHIT IS ABOUT TO END SOON!              | 
-| You are still in time to end your circus and get an honest job, instead of scamming people.|
-| But be quick, I AM COMING.                                                                 |
-|                                                                                            |
-| To "cucchiaio": dude wtf is wrong with you, take some meds and change your username        |
-| (currently: "gypijs1")                                                                     |
-|____________________________________________________________________________________________|
-
-1] Hard Mode (Recommended)
-2] Soft Mode (Mom's computer)
-3] Extreme Mode (Experts only, self-troubleshooting)
-
-Q -Quit
-    
-"@
+    Write-Host ""
+    Write-Host ""
+    Write-Host "       _____________.___.__________.___     ____. _________.___    ____________________________.________________________"
+    Write-Host "      /  _____/\__  |   |\______   \   |   |    |/   _____/|   |  /   _____/\_   ___ \______   \   \______   \__    ___/"
+    Write-Host "     /   \  ___ /   |   | |     ___/   |   |    |\_____  \ |   |  \_____  \ /    \  \/|       _/   ||     ___/ |    |   "
+    Write-Host "     \    \_\  \\____   | |    |   |   /\__|    |/        \|   |  /        \\     \___|    |   \   ||    |     |    |   "
+    Write-Host "      \______  // ______| |____|   |___\________/_______  /|___| /_______  / \______  /____|_  /___||____|     |____|   "
+    Write-Host "             \/ \/                                      \/               \/         \/       \/                         "
+    Write-Host ""
+    Write-Host ""
+    Write-Host "      ______ _   _ _____  _   __  ______  ___  ___________    _____ _____ ______ ___________ _____ _____ "
+    Write-Host "      |  ___| | | /  __ \| | / /  | ___ \/ _ \|_   _|  _  \  /  ___/  __ \| ___ \_   _| ___ \_   _/  ___|"
+    Write-Host "      | |_  | | | | /  \/| |/ /   | |_/ / /_\ \ | | | | | |  \ `--.| /  \/| |_/ / | | | |_/ / | | \ `--. "
+    Write-Host "      |  _| | | | | |    |    \   |  __/|  _  | | | | | | |   `--. \ |    |    /  | | |  __/  | |  `--. \"
+    Write-Host "      | |   | |_| | \__/\| |\  \  | |   | | | |_| |_| |/ /   /\__/ / \__/\| |\ \ _| |_| |     | | /\__/ /"
+    Write-Host "      \_|    \___/ \____/\_| \_/  \_|   \_| |_/\___/|___/    \____/ \____/\_| \_|\___/\_|     \_/ \____/ "
+    Write-Host ""
+    Write-Host "    TO ALESSIO IL FAI DA TE: KEEP CRYING, RETARDED DOXXER!"
+    Write-Host "    TO ZBLOODWYN: KEEP SELLING YOUR CTT BOOTLEG TO NEWBIES, I AM COMING!"
+    Write-Host "    TO DEMILS: LESS BULLSHIT ONLINE, GET OUT AND GET A LIFE!"
+    Write-Host ""
+    Write-Host ""
+    Write-Host "[1]. Hard Mode - Recommended."
+    Write-Host ""
+    Write-Host "[2]. Soft Mode - For your mom's computer."
+    Write-Host ""
+    Write-Host "[3]. Extreme - Disables core services. For experts users. You're on your own."
+    Write-Host ""
+    Write-Host "Press 1 for Hard Mode, 2 for Soft Mode and 3 for Extreme mode. Press Q to exit."
     $key = [System.Console]::ReadKey($true)
     switch ($key.KeyChar) {
         1 { & "$folderPath\$hardFile" }
@@ -86,22 +63,13 @@ Q -Quit
 }
 else {
     Write-Output "Run again the script when you'll have done everything."
-    timeout /t 7
 }
     
 }
 else {
     Write-Output "Run again the script when you'll have done everything."
-    timeout /t 7
 }
 }
 else {
     Write-Output "Run again the script when you'll have done everything."
-    timeout /t 7
 }
-
-
-
-
-
-
