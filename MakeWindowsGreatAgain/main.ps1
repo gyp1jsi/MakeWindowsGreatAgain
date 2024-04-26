@@ -62,8 +62,10 @@ do {
 | You are still in time to end your circus and get an honest job, instead of scamming people. |
 | But be quick, I AM COMING.                                                                  |
 |                                                                                             |
-| To "cucchiaio": dude wtf is wrong with you, take some meds and change your username         |
-| (currently: "gypijs1")                                                                      |
+| To ModiciaOS team: Are you so butthurt that you DMCA claim every critique towards your lame |
+| distro? You must be more experienced than me, yet you seem clearly retarded and unable to   |
+| take critiques as improvement. By the way, your distro SUCKS ASS. Report me, I dare you.    |
+| #freecikappa                                                                                |
 |_____________________________________________________________________________________________|
 
 1] Hard Mode (Recommended)
