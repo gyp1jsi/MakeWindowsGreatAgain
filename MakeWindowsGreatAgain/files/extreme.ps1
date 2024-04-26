@@ -1,5 +1,5 @@
 $host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Extreme)'
-
+timeout /t 2
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
@@ -25,13 +25,10 @@ if ($confirm -eq "y") {
             "Microsoft.Getstarted"
             "Microsoft.Messaging"
             "Microsoft.Microsoft3DViewer"
-            "Microsoft.MicrosoftOfficeHub"
             "Microsoft.MicrosoftPowerBIForWindows"
             "Microsoft.MicrosoftSolitaireCollection" # MS Solitaire
             "Microsoft.MixedReality.Portal"
             "Microsoft.NetworkSpeedTest"
-            "Microsoft.Office.OneNote"               # MS Office One Note
-            "Microsoft.Office.Sway"
             "Microsoft.OneConnect"
             "Microsoft.People"                       # People
             "Microsoft.MSPaint"                      # Paint 3D
@@ -72,7 +69,6 @@ if ($confirm -eq "y") {
             "*COOKINGFEVER*"
             "*CyberLinkMediaSuiteEssentials*"
             "*DisneyMagicKingdoms*"
-            "*Dolby*"                                # Dolby Products (Like Atmos)
             "*DrawboardPDF*"
             "*Duolingo-LearnLanguagesforFree*"       # Duolingo
             "*EclipseManager*"
@@ -143,9 +139,7 @@ if ($confirm -eq "y") {
             # [DIY] Common Streaming services
     
             "*Netflix*"                        # Netflix
-            "*SpotifyMusic*"                   # Spotify
             "*Spotify*"
-            "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work"
         )
         foreach ($App in $AppXApps) {
             Write-Verbose -Message ('Removing Package {0}' -f $App)
@@ -160,10 +154,45 @@ if ($confirm -eq "y") {
         Get-AppxPackage -AllUsers | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxPackage | Where-Object {$_.Name -NotMatch $WhitelistedApps} | Remove-AppxPackage
         Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $WhitelistedApps} | Remove-AppxProvisionedPackage -Online
+
+        # Disables Xbox Game Bar (avoids "you need an app to open this ms-gamingoverlay link")
+        reg add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR /f /t REG_DWORD /v "AppCaptureEnabled" /d 0
+        reg add HKEY_CURRENT_USER\System\GameConfigStore /f /t REG_DWORD /v "GameDVR_Enabled" /d 0
+        # Thanks to AVeYo: https://www.reddit.com/r/Windows11/comments/vm046d/comment/ie0j6o3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+        reg add HKCR\ms-gamebar /f /ve /d URL:ms-gamebar 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebar\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /ve /d URL:ms-gamebarservices 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "URL Protocol" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices /f /v "NoOpenWith" /d "" 2>&1 >''
+        reg add HKCR\ms-gamebarservices\shell\open\command /f /ve /d "\`"$env:SystemRoot\System32\systray.exe\`"" 2>&1 >''
 } else {
     Write-Output "Bloatware apps won't be uninstalled. You must be crazy if you don't uninstall them though."
 }
 
+#Removes Office related apps
+Write-Output "Do you want to remove Office-related apps? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    $OfficeApps = @(
+    "Microsoft.MicrosoftOfficeHub"
+    "Microsoft.Office.OneNote"               # MS Office One Note
+    "Microsoft.Office.Sway"
+    )
+    foreach ($App in $OfficeApps) {
+        Write-Verbose -Message ('Removing Package {0}' -f $App)
+        Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
+        Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+        Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+    }
+
+} else {
+    Write-Output "Ok champ"
+}
+
+
+#Removes Live Tiles Bloatware
 Write-Output "Do you want to reset the Start Menu Layout to eliminate bloatware Live Tiles? (Windows 10 Only) (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -532,7 +561,7 @@ function Optimize-Privacy() {
     }
     Set-ItemProperty -Path "$PathToLMPoliciesToWifi\AllowAutoConnectToWiFiSenseHotspots" -Name "value" -Type DWord -Value $Zero
 }
-
+}
 
 else {
     Write-Output "Windows will keep looking into your PC for no reason."
@@ -674,7 +703,19 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
 # Adapted from: https://gist.github.com/matthewjberger/2f4295887d6cb5738fa34e597f457b7f
 # Adapted from: https://github.com/Sycnex/Windows10Debloater
 
-# Services which will be totally disabled
+function Optimize-ServicesRunning() {
+    [CmdletBinding()]
+    param (
+        [Switch] $Revert
+    )
+
+    $IsSystemDriveSSD = $(Get-OSDriveType) -eq "SSD"
+    $EnableServicesOnSSD = @("SysMain")
+
+    $IsSystemWindows11 = $(Get-ComputerInfo | Select-Object -expand OsName) -match 11
+    $EnableServicesOnWindows11 = @("EventLog")
+
+    # Services which will be totally disabled
     $ServicesToDisabled = @(
         "DiagTrack"                                 # DEFAULT: Automatic | Connected User Experiences and Telemetry
         "diagnosticshub.standardcollector.service"  # DEFAULT: Manual    | Microsoft (R) Diagnostics Hub Standard Collector Service
@@ -727,6 +768,54 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
+        #MSI bloatware - taken from MakeWindowsGreatAgain 1.4.0
+        "Micro Star SCM"
+        "MSI_Center_Service"
+        "MSI Foundation Service"
+        "MSI_VoiceControl_Service"
+        "Mystic_Light_Service"
+        "NahimicService"
+        "NortonSecurity"
+        "nsWscSvc"
+        "FvSvc"
+        "RtkAudioUniversalService"
+        "LightKeeperService"
+        "AASSvc"
+        "AcerLightningService"
+        "DtsApo4Service"
+        "Killer Analytics Service"
+        "KNDBWM"
+        "KAPSService"
+        "McAWFwk"
+        "McAPExe"
+        "mccspsvc"
+        "mfefire"
+        "ModuleCoreService"
+        "PEFService"
+        "mfemms"
+        "mfevtp"
+        "McpManagementService"
+        "TbtP2pShortcutService"
+        "AMD Crash Defender Service"
+        "AMD External Events Utility"
+        "ArmouryCrateControlInterface"
+        "ArmouryCrateService"
+        "AsusAppService"
+        "LightingService"
+        "ASUSLinkNear"
+        "ASUSLinkRemote"
+        "ASUSOptimization"
+        "ASUSSoftwareManager"
+        "ASUSSwitch"
+        "ASUSSystemAnalysis"
+        "ASUSSystemDiagnosis"
+        "asus"
+        "asusm"
+        "AsusCertService"
+        "FMAPOService"
+        "mc-wps-secdashboardservice"
+        "Aura Wallpaper Service"
+        "HomeGroupListener"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -740,7 +829,6 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
         "FontCache"                      # DEFAULT: Automatic | Windows Font Cache
         "iphlpsvc"                       # DEFAULT: Automatic | IP Helper Service (IPv6 (6to4, ISATAP, Port Proxy and Teredo) and IP-HTTPS)
         "lmhosts"                        # DEFAULT: Manual    | TCP/IP NetBIOS Helper
-        "ndu"                            # DEFAULT: Automatic | Windows Network Data Usage Monitoring Driver (Shows network usage per-process on Task Manager)
         "wuauserv"                       # DEFAULT: Automatic | Windows Update
         "UsoSvc"                         # DEFAULT: Automatic | Update Orchestrator Service (Manages the download and installation of Windows updates)
         #"NetTcpPortSharing"             # DEFAULT: Disabled  | Net.Tcp Port Sharing Service
@@ -801,9 +889,41 @@ Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.ps
         "LanmanServer"                   # DEFAULT: Automatic (Delayed Start) | Server
 
     )
-    Write-Host "Disabling services... just wait."
-    Set-ServiceStartup -Disabled -Services $ServicesToDisabled
+
+    Write-Title -Text "Services tweaks"
+    Write-Section -Text "Disabling services from Windows"
+
     Set-ServiceStartup -Manual -Services $ServicesToManual
+    If ($Revert) {
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
+        Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD $EnableServicesOnWindows11 -CustomMessage $CustomMessage
+    } Else {
+        Set-ServiceStartup -Disabled -Services $ServicesToDisabled -Filter $EnableServicesOnSSD
+    }
+
+    Write-Section -Text "Enabling services from Windows"
+
+     If ($IsSystemDriveSSD -or $Revert) {
+        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on SSDs ..." }
+        Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
+    }
+
+    If ($IsSystemWindows11 -or $Revert) {
+        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on Windows 11 ..." }
+        Set-ServiceStartup -Automatic -Services $EnableServicesOnWindows11 -CustomMessage $CustomMessage
+    }
+}
+
+function Main() {
+    # List all services:
+    #Get-Service | Select-Object StartType, Status, Name, DisplayName, ServiceType | Sort-Object StartType, Status, Name | Out-GridView
+
+    If (!$Revert) {
+        Optimize-ServicesRunning # Enable essential Services and Disable bloating Services
+    } Else {
+        Optimize-ServicesRunning -Revert
+    }
 }
 
 Main
@@ -1298,10 +1418,74 @@ if (-not (Get-Process -Name 'explorer' -ErrorAction SilentlyContinue)) {
     Write-Output "Microsoft Edge will not be uninstalled."
 }
 
+Write-Output "Do you want to disable Teredo? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+    netsh interface teredo set state disabled
+}
+else {
+    Write-Output "Teredo will not be disabled."
+}
 
+Write-Output "Do you want to remove OneDrive?"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    # Thanks to Overmind: https://superuser.com/questions/1201530/windows10-how-do-i-uninstall-onedrive-app-via-powershell
+    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\force-mkdir.psm1
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\take-own.psm1
 
+Write-Output "kill OneDrive process and explorer"
+taskkill.exe /F /IM "OneDrive.exe"
+taskkill.exe /F /IM "explorer.exe"
 
+Write-Output "Remove OneDrive"
+if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
+    & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
+}
+if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
+    & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
+}
 
+Write-Output "Disable OneDrive via Group Policies"
+force-mkdir "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive"
+Set-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" "DisableFileSyncNGSC" 1
+
+Write-Output "Removing OneDrive leftovers trash"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
+Remove-Itemmove-Item -Recurse -Force -ErrorAction SilentlyContinue "C:\OneDriveTemp"
+
+Write-Output "Remove Onedrive from explorer sidebar"
+New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
+mkdir -Force "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+Set-ItemProperty "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
+mkdir -Force "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+Set-ItemProperty "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
+Remove-PSDrive "HKCR"
+
+Write-Output "Removing run option for new users"
+reg load "hku\Default" "C:\Users\Default\NTUSER.DAT"
+reg delete "HKEY_USERS\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "OneDriveSetup" /f
+reg unload "hku\Default"
+
+Write-Output "Removing startmenu junk entry"
+Remove-Item -Force -ErrorAction SilentlyContinue "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk"
+
+Write-Output "Restarting explorer..."
+Start-Process "explorer.exe"
+
+Write-Output "Wait for EX reload.."
+Start-Sleep 15
+
+Write-Output "Removing additional OneDrive leftovers"
+foreach ($item in (Get-ChildItem "$env:WinDir\WinSxS\*onedrive*")) {
+    Takeown-Folder $item.FullName
+    Remove-Item -Recurse -Force $item.FullName
+}
+}
+else{
+    Write-Output "OneDrive will not be removed"
+}
 Write-Output "Do you want to optimize Task Scheduler tasks? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -1402,5 +1586,3 @@ if ($confirm -eq "y") {
 else {
     Write-Output "Cortana will not be disabled."
 }
-
-

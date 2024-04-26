@@ -1,4 +1,5 @@
 $host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Hard)'
+timeout /t 2
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
 
