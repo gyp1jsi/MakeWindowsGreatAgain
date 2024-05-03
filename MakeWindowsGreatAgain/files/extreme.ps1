@@ -1588,8 +1588,8 @@ $confirm = Read-Host
 if ($confirm -eq "y") {
     takeown /f "C:\Windows\System32\mcupdate_GenuineIntel.dll" /r /d y
     takeown /f "C:\Windows\System32\mcupdate_AuthenticAMD.dll" /r /d y
-    del "C:\Windows\System32\mcupdate_GenuineIntel.dll" /s /f /q
-    del "C:\Windows\System32\mcupdate_AuthenticAMD.dll" /s /f /q 
+    Remove-Itemove-Item "C:\Windows\System32\mcupdate_GenuineIntel.dll" /s /f /q
+    Remove-Item "C:\Windows\System32\mcupdate_AuthenticAMD.dll" /s /f /q 
 }
 else {
     Write-Output "Microcode will not be deleted"
@@ -1640,4 +1640,228 @@ timeout /t 1 /nobreak > NUL
 }
 else {
     Write-Output "Memory compression will not be disabled."
+}
+
+Write-Output "Do you want to disable page combining? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+Write-Output Disabling Page Combining
+PowerShell -Command "Disable-MMAgent -PageCombining"
+timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Page combining will not be disabled."
+}
+
+Write-Output "Do you want to set Win32Priority? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    Write-Output Setting Win32Priority
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "Win32PrioritySeparation" /t REG_DWORD /d "38" /f
+    timeout /t 1 /nobreak > NUL   
+}
+else {
+    Write-Output "Win32Priority will not be set."
+}
+
+Write-Output "Do you want to enable large system cache? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+Write-Output Enabling Large System Cache
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "LargeSystemCache" /t REG_DWORD /d "1" /f
+timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Large system cache will not be enabled"
+}
+
+Write-Output "Do you want to disable Fast Startup? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+Write-Output Disabling Fast Startup
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v "HiberbootEnabled" /t REG_DWORD /d "0" /f
+timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Fast Startup will not be disabled."
+}
+
+Write-Output "Do you want to disable hibernation? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+Write-Output Disabling Hibernation
+powercfg /h off
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "HibernateEnabled" /t REG_DWORD /d "0" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "SleepReliabilityDetailedDiagnostics" /t REG_DWORD /d "0" /f
+timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Hibernation will not be disabled."
+}
+
+Write-Output "Do you want to disable Sleep Study? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    Write-Output Disabling Sleep Study
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v "SleepStudyDisabled" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Sleep Study will not be disabled."
+}
+
+Write-Output "Do you want to disable DEP? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    Write-Outpute-Output Disabling DEP
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" /v "DEPOff" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "DEP will not be disabled."
+}
+
+Write-Output "Do you want to disable Automatic Maintenance? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    Write-Outpute-Output Disabling Automatic Maintenance
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "Automatic Maintenance will not be disabled."
+}
+
+Write-Output "Do you want to disable Paging Executive? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+    Write-Output Disabling Paging Executive
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "DisablePagingExecutive" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "Paging Executive will not be disabled."
+}
+
+Write-Output "Do you want to disable FTH (Fault Tolerant Heap)? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    Write-Outpute-Output Disabling Fault Tolerant Heap
+    reg add "HKLM\SOFTWARE\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d "0" /f
+    timeout /t 1Write /nobreak > NUL    
+}
+else {
+    Write-Output "FTH will not be disabled."
+}
+
+Write-Output "Do you want to disable ASLR (Address Space Layout Randomization)? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "MoveImages" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "ASLR will not be disabled."
+}
+
+Write-Output "Do you want to disable Power Throttling? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    Write-Output Disabling Power Throttling
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Executive" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\ModernSleep" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "PlatformAoAcOverride" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "EnergyEstimationEnabled" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "EventProcessorEnabled" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power" /v "CsEnabled" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" /v "PowerThrottlingOff" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "Power Throttling will not be disabled."
+}
+
+Write-Output "Do you want to disable GpuEnergyDrv? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    Write-Outpute-Output Disabling GPU Energy Driver
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDrv" /v "Start" /t REG_DWORD /d "4" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDr" /v "Start" /t REG_DWORD /d "4" /f
+    timeout /t 1 /nobreak > N    
+}
+else {
+    Write-Output "GpuEnergyDrv will not be disabled."
+}
+
+Write-Output "Do you want to disable Energy Logging? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    Write-Output Disabling Energy Logging
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "DisableTaggedEnergyLogging" /t REG_DWORD /d "1" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "TelemetryMaxApplication" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "TelemetryMaxTagPerApplication" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "Energy Logging will not be disabled."
+}
+
+Write-Output "Do you want to optimize system responsiveness? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    echo Setting System Responsiveness
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "SystemResponsiveness" /t REG_DWORD /d "10" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "System responsiveness will not be optimized."
+}
+
+Write-Output "Do you want to disable NVIDIA Telemetry? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    echo Disabling NVIDIA Telemetry
+    reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "NvBackend" /f
+    reg add "HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client" /v "OptInOrOutPreference" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS" /v "EnableRID66610" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS" /v "EnableRID64640" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS" /v "EnableRID44231" /t REG_DWORD /d "0" /f
+    schtasks /change /disable /tn "NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NvDriverUpdateCheckDaily_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NVIDIA GeForce Experience SelfUpdate_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    schtasks /change /disable /tn "NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "NVIDIA Telemetry will not be disabled. WTF???"
+}
+
+Write-Output "Do you want to disable NVIDIA Display Power Saving? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    echo Disabling NVIDIA Display Power Saving
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Global\NVTweak" /v "DisplayPowerSaving" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "NVIDIA Display Power Saving will not be disabled."
+}
+
+Write-Output "Do you want to disable AMD Logging? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+    echo Disabling AMD Logging
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\amdlog" /v "Start" /t REG_DWORD /d "4" /f
+    timeout /t 1 /nobreak > NUL    
+}
+else {
+    Write-Output "AMD Logging will not be disabled."
 }
