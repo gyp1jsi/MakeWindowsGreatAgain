@@ -1421,7 +1421,7 @@ if (-not (Get-Process -Name 'explorer' -ErrorAction SilentlyContinue)) {
 Write-Output "Do you want to disable Teredo? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    netsh interface teredo set state disabled
+    cmd -c netsh interface teredo set state disabled
 }
 else {
     Write-Output "Teredo will not be disabled."
@@ -1430,62 +1430,20 @@ else {
 Write-Output "Do you want to remove OneDrive?"
 $confirm = Read-Host
 if ($confirm -eq "y"){
-    # Thanks to Overmind: https://superuser.com/questions/1201530/windows10-how-do-i-uninstall-onedrive-app-via-powershell
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\force-mkdir.psm1
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\take-own.psm1
+# kill the onedrive prcess
+taskkill /f /im OneDrive.exe
 
-Write-Output "kill OneDrive process and explorer"
-taskkill.exe /F /IM "OneDrive.exe"
-taskkill.exe /F /IM "explorer.exe"
+# uninstall the onedrive
+# for x64 system (I tested it on my machine)
+cmd -c "%SystemRoot%\SysWOW64\OneDriveSetup.exe /uninstall"
 
-Write-Output "Remove OneDrive"
-if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
-    & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
-}
-if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
-    & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
-}
-
-Write-Output "Disable OneDrive via Group Policies"
-force-mkdir "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive"
-Set-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" "DisableFileSyncNGSC" 1
-
-Write-Output "Removing OneDrive leftovers trash"
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
-Remove-Itemmove-Item -Recurse -Force -ErrorAction SilentlyContinue "C:\OneDriveTemp"
-
-Write-Output "Remove Onedrive from explorer sidebar"
-New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
-mkdir -Force "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
-Set-ItemProperty "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
-mkdir -Force "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
-Set-ItemProperty "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
-Remove-PSDrive "HKCR"
-
-Write-Output "Removing run option for new users"
-reg load "hku\Default" "C:\Users\Default\NTUSER.DAT"
-reg delete "HKEY_USERS\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "OneDriveSetup" /f
-reg unload "hku\Default"
-
-Write-Output "Removing startmenu junk entry"
-Remove-Item -Force -ErrorAction SilentlyContinue "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk"
-
-Write-Output "Restarting explorer..."
-Start-Process "explorer.exe"
-
-Write-Output "Wait for EX reload.."
-Start-Sleep 15
-
-Write-Output "Removing additional OneDrive leftovers"
-foreach ($item in (Get-ChildItem "$env:WinDir\WinSxS\*onedrive*")) {
-    Takeown-Folder $item.FullName
-    Remove-Item -Recurse -Force $item.FullName
-}
+# for x86 machines
+cmd -c "%SystemRoot%\System32\OneDriveSetup.exe /uninstall"
 }
 else{
     Write-Output "OneDrive will not be removed"
 }
+
 Write-Output "Do you want to optimize Task Scheduler tasks? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
@@ -1585,4 +1543,101 @@ if ($confirm -eq "y") {
 }
 else {
     Write-Output "Cortana will not be disabled."
+}
+
+Write-Output "Do you want to tweak BCD? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y") {
+bcdedit /set useplatformclock No
+bcdedit /set platformtick No
+bcdedit /set disabledynamictick Yes
+bcdedit /set tscsyncpolicy Enhanced
+bcdedit /set firstmegabytepolicy UseAll
+bcdedit /set avoidlowmemory 0x8000000
+bcdedit /set nolowmem Yes
+bcdedit /set allowedinmemorysettings 0x0
+bcdedit /set isolatedcontext No
+bcdedit /set vsmlaunchtype Off
+bcdedit /set vm No
+bcdedit /set x2apicpolicy Enable
+bcdedit /set configaccesspolicy Default
+bcdedit /set MSI Default
+bcdedit /set usephysicaldestination No
+bcdedit /set usefirmwarepcisettings No
+bcdedit /set disableelamdrivers Yes
+bcdedit /set pae ForceEnable
+bcdedit /set nx optout
+bcdedit /set highestmode Yes
+bcdedit /set forcefipscrypto No
+bcdedit /set noumex Yes
+bcdedit /set uselegacyapicmode No
+bcdedit /set ems No
+bcdedit /set extendedinput Yes
+bcdedit /set debug No
+bcdedit /set hypervisorlaunchtype Off
+bcdedit /set useplatformclock No
+bcdedit /seplatformtick No
+bcdedit /set disabledynamictick Yes
+}
+else {
+    Write-Output "BCD will not be tweaked"
+}
+
+Write-Output "Do you want to delete microcode? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+    takeown /f "C:\Windows\System32\mcupdate_GenuineIntel.dll" /r /d y
+    takeown /f "C:\Windows\System32\mcupdate_AuthenticAMD.dll" /r /d y
+    del "C:\Windows\System32\mcupdate_GenuineIntel.dll" /s /f /q
+    del "C:\Windows\System32\mcupdate_AuthenticAMD.dll" /s /f /q 
+}
+else {
+    Write-Output "Microcode will not be deleted"
+}
+
+Write-Output "Do you want to disable mitigations? [Affects overall security] (yes/no)"
+$confirm = Read-Host
+if ($confirm -eq "yes") {
+powershell "ForEach($v in (Get-Command -Name \"Set-ProcessMitigation\").Parameters[\"Disable\"].Attributes.ValidValues){Set-ProcessMitigation -System -Disable $v.ToString() -ErrorAction SilentlyContinue}"
+powershell "Remove-Item -Path \"HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\*\" -Recurse -ErrorAction SilentlyContinue"
+reg add "HKLM\SOFTWARE\Policies\Microsoft\FVE" /v "DisableExternalDMAUnderLock" /t REG_DWORD /d "0" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d "0" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard" /v "HVCIMATRequired" /t REG_DWORD /d "0" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v "DisableExceptionChainValidation" /t REG_DWORD /d "1" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v "KernelSEHOPEnabled" /t REG_DWORD /d "0" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "EnableCfg" /t REG_DWORD /d "0" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v "ProtectionMode" /t REG_DWORD /d "0" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "FeatureSettings" /t REG_DWORD /d "1" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "FeatureSettingsOverride" /t REG_DWORD /d "3" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "FeatureSettingsOverrideMask" /t REG_DWORD /d "3" /f
+
+# (Sub Mitigations)
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v "MitigationOptions" /t REG_BINARY /d "222222222222222222222222222222222222222222222222" /f
+}
+else {
+    Write-Output "Mitigations will not be disabled"
+}
+
+Write-Output "Do you want to tweak the NTFS filesystem? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+fsutil behavior set memoryusage 2
+fsutil behavior set mftzone 4
+fsutil behavior set disablelastaccess 1
+fsutil behavior set disabledeletenotify 0
+fsutil behavior set encryptpagingfile 0
+}
+else {
+    Write-Output "The NTFS filesystem will not be tweaked"
+}
+
+Write-Output "Do you want to disable memory compression? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y") {
+Write-Output Disabling Memory Compression
+PowerShell -Command "Disable-MMAgent -MemoryCompression"
+timeout /t 1 /nobreak > NUL
+}
+else {
+    Write-Output "Memory compression will not be disabled."
 }
