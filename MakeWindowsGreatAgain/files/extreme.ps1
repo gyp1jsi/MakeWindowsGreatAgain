@@ -1545,6 +1545,35 @@ else {
     Write-Output "Cortana will not be disabled."
 }
 
+Write-Output "Do you want to disable UAC (User Account Control)? (yes/no)"
+$confirm = Read-Host
+if($confirm -eq "yes"){
+    # Thanks to ishu3101: https://gist.github.com/ishu3101/d76900d513383595bf5e7c8b8afe78c2
+    function Disable-UAC(){
+        $numVersion = (Get-CimInstance Win32_OperatingSystem).Version
+        $numSplit = $numVersion.split(".")[0]
+     
+        if ($numSplit -eq 10) {
+            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
+        }
+        elseIf ($numSplit -eq 6) {
+            $enumSplit = $numSplit.split(".")[1]
+            if ($enumSplit -eq 1 -or $enumSplit -eq 0) {
+                Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value "0"
+            } else {
+                Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
+            }
+        }
+        elseIf ($numSplit -eq 5) {
+            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value "0"
+        }
+        else {
+            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
+        }
+        Write-Host "Successfully Disabled UAC!"
+    }    
+}
+
 Write-Output "Do you want to tweak BCD? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
@@ -2085,7 +2114,7 @@ if($confirm -eq "y"){
     timeout /t 1 /nobreak > NUL
     
     Write-Output "Enabling WH Send and Recieve"
-    powershell "Get-NetAdapter -IncludeHidden | Set-NetIPInterface -WeakHostSend Enabled -WeakHostReceive Enabled -ErrorAction SilentlyContinue"
+    Get-NetAdapter -IncludeHidden | Set-NetIPInterface -WeakHostSend Enabled -WeakHostReceive Enabled -ErrorAction SilentlyContinue
     timeout /t 1 /nobreak > NUL
     
 }
