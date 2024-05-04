@@ -1767,7 +1767,7 @@ else {
 Write-Output "Do you want to disable Power Throttling? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y"){
-    Write-Output Disabling Power Throttling
+    Write-Output "Disabling Power Throttling"
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "CoalescingTimerInterval" /t REG_DWORD /d "0" /f
@@ -1789,7 +1789,7 @@ else {
 Write-Output "Do you want to disable GpuEnergyDrv? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y"){
-    Write-Outpute-Output Disabling GPU Energy Driver
+    Write-Outpute "Disabling GPU Energy Driver"
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDrv" /v "Start" /t REG_DWORD /d "4" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDr" /v "Start" /t REG_DWORD /d "4" /f
     timeout /t 1 /nobreak > N    
@@ -1801,7 +1801,7 @@ else {
 Write-Output "Do you want to disable Energy Logging? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y"){
-    Write-Output Disabling Energy Logging
+    Write-Output "Disabling Energy Logging"
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "DisableTaggedEnergyLogging" /t REG_DWORD /d "1" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "TelemetryMaxApplication" /t REG_DWORD /d "0" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Control\Power\EnergyEstimation\TaggedEnergy" /v "TelemetryMaxTagPerApplication" /t REG_DWORD /d "0" /f
@@ -1814,7 +1814,7 @@ else {
 Write-Output "Do you want to optimize system responsiveness? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    echo Setting System Responsiveness
+    Write-Outpute "Setting System Responsiveness"
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "SystemResponsiveness" /t REG_DWORD /d "10" /f
     timeout /t 1 /nobreak > NUL    
 }
@@ -1825,7 +1825,7 @@ else {
 Write-Output "Do you want to disable NVIDIA Telemetry? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    echo Disabling NVIDIA Telemetry
+    Write-Output "Disabling NVIDIA Telemetry"
     reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "NvBackend" /f
     reg add "HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client" /v "OptInOrOutPreference" /t REG_DWORD /d "0" /f
     reg add "HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS" /v "EnableRID66610" /t REG_DWORD /d "0" /f
@@ -1847,7 +1847,7 @@ else {
 Write-Output "Do you want to disable NVIDIA Display Power Saving? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    echo Disabling NVIDIA Display Power Saving
+    Write-Output "Disabling NVIDIA Display Power Saving"
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Global\NVTweak" /v "DisplayPowerSaving" /t REG_DWORD /d "0" /f
     timeout /t 1 /nobreak > NUL    
 }
@@ -1858,10 +1858,234 @@ else {
 Write-Output "Do you want to disable AMD Logging? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    echo Disabling AMD Logging
+    Write-Output "Disabling AMD Logging"
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\amdlog" /v "Start" /t REG_DWORD /d "4" /f
     timeout /t 1 /nobreak > NUL    
 }
 else {
     Write-Output "AMD Logging will not be disabled."
+}
+
+Write-Output "Do you want to optimize network connectivity? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "NetworkThrottlingIndex" /t REG_DWORD /d "4294967295" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting Network AutoTuning to Disabled"
+    netsh int tcp set global autotuninglevel=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Explicit Congestion Notification"
+    netsh int tcp set global ecncapability=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Enabling Direct Cache Access"
+    netsh int tcp set global dca=enabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Enabling Network Direct Memory Access"
+    netsh int tcp set global netdma=enabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Recieve Side Coalescing"
+    netsh int tcp set global rsc=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Enabling Recieve Side Scaling"
+    netsh int tcp set global rss=enabled
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Ndis\Parameters" /v "RssBaseCpu" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling TCP Timestamps"
+    netsh int tcp set global timestamps=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting Initial Retransmission Timer"
+    netsh int tcp set global initialRto=2000
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting MTU Size"
+    netsh interface ipv4 set subinterface “Ethernet” mtu=1500 store=persistent
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Non Sack RTT Resiliency"
+    netsh int tcp set global nonsackrttresiliency=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting Max Syn Retransmissions"
+    netsh int tcp set global maxsynretransmissions=2
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Memory Pressure Protection"
+    netsh int tcp set security mpp=disabled
+    timeout /t 1 /nobreak > NUL
+    
+    Write-Output "Disabling Windows Scaling Heuristics"
+    netsh int tcp set heuristics disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Increasing ARP Cache Size"
+    netsh int ip set global neighborcachelimit=4096
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Enabling CTCP"
+    netsh int tcp set supplemental Internet congestionprovider=ctcp
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Task Offloading"
+    netsh int ip set global taskoffload=disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling ISATAP"
+    netsh int isatap set state disabled
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Configuring Time to Live"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "DefaultTTL" /t REG_DWORD /d "64" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Enabling TCP Window Scaling"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "Tcp1323Opts" /t REG_DWORD /d "1" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting TcpMaxDupAcks to 2"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "TcpMaxDupAcks" /t REG_DWORD /d "2" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling TCP Selective ACKs"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "SackOpts" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Increasing Maximum Port Number"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "MaxUserPort" /t REG_DWORD /d "65534" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Decreasing Timed Wait Delay"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "TcpTimedWaitDelay" /t REG_DWORD /d "30" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting Network Priorities"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /v "LocalPriority" /t REG_DWORD /d "4" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /v "HostsPriority" /t REG_DWORD /d "5" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /v "DnsPriority" /t REG_DWORD /d "6" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /v "NetbtPriority" /t REG_DWORD /d "7" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Configuring Sock Address Size"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Winsock" /v "MinSockAddrLength" /t REG_DWORD /d "16" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Winsock" /v "MaxSockAddrLength" /t REG_DWORD /d "16" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Nagle's Algorithm"
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" /v "TcpAckFrequency" /t REG_DWORD /d "1" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" /v "TCPNoDelay" /t REG_DWORD /d "1" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" /v "TcpDelAckTicks" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Delivery Optimization"
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v "DODownloadMode" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v "DownloadMode" /t REG_DWORD /d "0" /f
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings" /v "DownloadMode" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Auto Disconnect"
+    reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "autodisconnect" /t REG_DWORD /d "4294967295" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Limiting SMB Sessions"
+    reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "Size" /t REG_DWORD /d "3" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Oplocks"
+    reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "EnableOplocks" /t REG_DWORD /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Setting IRP Stack Size"
+    reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "IRPStackSize" /t REG_DWORD /d "20" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling NIC Power Savings"
+    reg add "%%n" /v "AutoPowerSaveModeEnabled" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "AutoDisableGigabit" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "AdvancedEEE" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "DisableDelayedPowerUp" /t REG_SZ /d "2" /f
+    reg add "%%n" /v "*EEE" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EEE" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnablePME" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EEELinkAdvertisement" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnableGreenEthernet" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnableSavePowerNow" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnablePowerManagement" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnableDynamicPowerGating" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnableConnectedPowerGating" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "EnableWakeOnLan" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "GigaLite" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "NicAutoPowerSaver" /t REG_SZ /d "2" /f
+    reg add "%%n" /v "PowerDownPll" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "PowerSavingMode" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "ReduceSpeedOnPowerDown" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "SmartPowerDownEnable" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "S5NicKeepOverrideMacAddrV2" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "S5WakeOnLan" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "ULPMode" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "WakeOnDisconnect" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "*WakeOnMagicPacket" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "*WakeOnPattern" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "WakeOnLink" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "WolShutdownLinkSpeed" /t REG_SZ /d "2" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Jumbo Frame"
+    reg add "%%n" /v "JumboPacket" /t REG_SZ /d "1514" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Configuring Buffer Sizes"
+    reg add "%%n" /v "TransmitBuffers" /t REG_SZ /d "4096" /f
+    reg add "%%n" /v "ReceiveBuffers" /t REG_SZ /d "512" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Configuring Offloads"
+    reg add "%%n" /v "IPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "LsoV1IPv4" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "LsoV2IPv4" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "LsoV2IPv6" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "PMARPOffload" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "PMNSOffload" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "TCPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "TCPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "UDPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "UDPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    timeout /t 1 /nobreak > NUL
+    
+    Write-Output "Enabling RSS in NIC"
+    reg add "%%n" /v "RSS" /t REG_SZ /d "1" /f
+    reg add "%%n" /v "*NumRssQueues" /t REG_SZ /d "2" /f
+    reg add "%%n" /v "RSSProfile" /t REG_SZ /d "3" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Flow Control"
+    reg add "%%n" /v "*FlowControl" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "FlowControlCap" /t REG_SZ /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Removing Interrupt Delays"
+    reg add "%%n" /v "TxIntDelay" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "TxAbsIntDelay" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "RxIntDelay" /t REG_SZ /d "0" /f
+    reg add "%%n" /v "RxAbsIntDelay" /t REG_SZ /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Removing Adapter Notification Sending"
+    reg add "%%n" /v "FatChannelIntolerant" /t REG_SZ /d "0" /f
+    timeout /t 1 /nobreak > NUL
+
+    Write-Output "Disabling Interrupt Moderation"
+    reg add "%%n" /v "*InterruptModeration" /t REG_SZ /d "0" /f
+    timeout /t 1 /nobreak > NUL
+    
+    Write-Output "Enabling WH Send and Recieve"
+    powershell "Get-NetAdapter -IncludeHidden | Set-NetIPInterface -WeakHostSend Enabled -WeakHostReceive Enabled -ErrorAction SilentlyContinue"
+    timeout /t 1 /nobreak > NUL
+    
 }
