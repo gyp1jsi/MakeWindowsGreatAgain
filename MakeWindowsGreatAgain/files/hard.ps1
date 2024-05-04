@@ -1745,3 +1745,6 @@ if($confirm -eq "y"){
     timeout /t 1 /nobreak > NUL
     
 }
+else {
+    Write-Output "Network connectivity will not be optimized."
+}

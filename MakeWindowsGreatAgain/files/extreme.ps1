@@ -1573,6 +1573,9 @@ if($confirm -eq "yes"){
         Write-Host "Successfully Disabled UAC!"
     }    
 }
+else{
+    Write-Output "UAC will not be disabled."
+}
 
 Write-Output "Do you want to tweak BCD? (y/n)"
 $confirm = Read-Host
@@ -2117,4 +2120,7 @@ if($confirm -eq "y"){
     Get-NetAdapter -IncludeHidden | Set-NetIPInterface -WeakHostSend Enabled -WeakHostReceive Enabled -ErrorAction SilentlyContinue
     timeout /t 1 /nobreak > NUL
     
+}
+else {
+    Write-Output "Network connectivity will not be optimized."
 }
