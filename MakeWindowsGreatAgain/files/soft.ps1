@@ -539,8 +539,78 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-
-
+    function Stop-UnnecessaryServices
+	{
+		$servicesAuto = @"
+			"AudioSrv",
+			"AudioEndpointBuilder",
+			"BFE",
+			"BrokerInfrastructure",
+			"CDPSvc",
+			"CDPUserSvc_dc2a4",
+			"CoreMessagingRegistrar",
+			"CryptSvc",
+			"DPS",
+			"DcomLaunch",
+			"Dhcp",
+			"DispBrokerDesktopSvc",
+			"Dnscache",
+			"DoSvc",
+			"DusmSvc",
+			"EventLog",
+			"EventSystem",
+			"FontCache",
+			"LSM",
+			"LanmanServer",
+			"LanmanWorkstation",
+			"MapsBroker",
+			"MpsSvc",
+			"OneSyncSvc_dc2a4",
+			"Power",
+			"ProfSvc",
+			"RpcEptMapper",
+			"RpcSs",
+			"SCardSvr",
+			"SENS",
+			"SamSs",
+			"Schedule",
+			"SgrmBroker",
+			"ShellHWDetection",
+			"Spooler",
+			"SystemEventsBroker",
+			"TextInputManagementService",
+			"Themes",
+			"TrkWks",
+			"UserManager",
+			"VGAuthService",
+			"VMTools",
+			"WSearch",
+			"Wcmsvc",
+			"WinDefend",
+			"Winmgmt",
+			"WlanSvc",
+			"WpnService",
+			"WpnUserService_dc2a4",
+			"cbdhsvc_dc2a4",
+			"gpsvc",
+			"iphlpsvc",
+			"mpssvc",
+			"nsi",
+			"sppsvc",
+			"tiledatamodelsvc",
+			"vm3dservice",
+			"webthreatdefusersvc_dc2a4",
+			"wscsvc"
+"@		
+	
+		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
+		foreach($service in $allServices)
+		{
+			Stop-Service -Name $service.Name -PassThru
+			Set-Service $service.Name -StartupType Manual
+			"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
+		}
+	}
 
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
