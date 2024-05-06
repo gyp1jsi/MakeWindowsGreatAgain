@@ -621,6 +621,21 @@ $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
     
+# Saves a copy of running services before running this part to be restored if needed
+# Get all services and filter by start type
+$automaticServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" } | Select-Object -ExpandProperty Name
+$manualServices = Get-Service | Where-Object { $_.StartType -eq "Manual" } | Select-Object -ExpandProperty Name
+$disabledServices = Get-Service | Where-Object { $_.StartType -eq "Disabled" } | Select-Object -ExpandProperty Name
+
+# Define the file path for the output
+$AutoOutput = "C:\MakeWindowsGreatAgain\backup\autoserv.txt"
+$ManOutput = "C:\MakeWindowsGreatAgain\backup\manserv.txt"
+$DisOutput = "C:\MakeWindowsGreatAgain\backup\disserv.txt"
+
+# Create or overwrite the output file
+$automaticServices | Out-File -FilePath $AutoOutput
+$manualServices | Out-File -FilePath $ManOutput
+$disabledServices | Out-File -FilePath $DisOutput
     function Stop-UnnecessaryServices
 	{
 		$servicesAuto = @"

@@ -539,7 +539,10 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
+
+
+
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
 
