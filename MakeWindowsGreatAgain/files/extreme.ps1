@@ -1778,6 +1778,17 @@ else{
     Write-Output "UAC will not be disabled."
 }
 
+Write-Output "Do you want to set Windows Update frequency to security only? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "BranchReadinessLevel" /t REG_DWORD /d "20" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferFeatureUpdatesPeriodInDays" /t REG_DWORD /d "365" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferQualityUpdatesPeriodInDays " /t REG_DWORD /d "4" /f
+}
+else {
+    Write-Output "Windows updates will not be set to security only."
+}
+
 Write-Output "Do you want to tweak BCD? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
@@ -2047,7 +2058,7 @@ else {
 Write-Output "Do you want to optimize system responsiveness? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    Write-Outpute "Setting System Responsiveness"
+    Write-Output "Setting System Responsiveness"
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "SystemResponsiveness" /t REG_DWORD /d "10" /f
     timeout /t 1 /nobreak > NUL    
 }

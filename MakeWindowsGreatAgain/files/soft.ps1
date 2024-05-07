@@ -656,7 +656,6 @@ function Optimize-ServicesRunning() {
         "DiagTrack"
         "DialogBlockingService"
         "esifsvc"
-        "ETDService"                                # In case of problems, enable again.
         "HfcDisableService"
         "HPAppHelperCap"
         "HPDiagsCap"
@@ -819,4 +818,15 @@ if ($confirm -eq "y") {
 }
 else {
     Write-Output "Cortana will not be disabled."
+}
+
+Write-Output "Do you want to set Windows Update frequency to security only? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "BranchReadinessLevel" /t REG_DWORD /d "20" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferFeatureUpdatesPeriodInDays" /t REG_DWORD /d "365" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferQualityUpdatesPeriodInDays " /t REG_DWORD /d "4" /f
+}
+else {
+    Write-Output "Windows updates will not be set to security only."
 }
