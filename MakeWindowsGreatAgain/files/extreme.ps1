@@ -1957,7 +1957,7 @@ else {
 Write-Output "Do you want to disable DEP? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    Write-Outpute-Output Disabling DEP
+    Write-Output "Disabling DEP"
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" /v "DEPOff" /t REG_DWORD /d "1" /f
     timeout /t 1 /nobreak > NUL    
 }
@@ -1968,7 +1968,7 @@ else {
 Write-Output "Do you want to disable Automatic Maintenance? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    Write-Outpute-Output Disabling Automatic Maintenance
+    Write-Output "Disabling Automatic Maintenance"
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d "1" /f
     timeout /t 1 /nobreak > NUL    
 }
@@ -1990,7 +1990,7 @@ else {
 Write-Output "Do you want to disable FTH (Fault Tolerant Heap)? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y") {
-    Write-Outpute-Output Disabling Fault Tolerant Heap
+    Write-Output "Disabling Fault Tolerant Heap"
     reg add "HKLM\SOFTWARE\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d "0" /f
     timeout /t 1Write /nobreak > NUL    
 }
@@ -2033,7 +2033,7 @@ else {
 Write-Output "Do you want to disable GpuEnergyDrv? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y"){
-    Write-Outpute "Disabling GPU Energy Driver"
+    Write-Output "Disabling GPU Energy Driver"
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDrv" /v "Start" /t REG_DWORD /d "4" /f
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\GpuEnergyDr" /v "Start" /t REG_DWORD /d "4" /f
     timeout /t 1 /nobreak > N    
