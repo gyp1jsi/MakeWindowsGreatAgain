@@ -620,7 +620,7 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    
+mkdir C:\MakeWindowsGreatAgain\backup    
 # Saves a copy of running services before running this part to be restored if needed
 # Get all services and filter by start type
 $automaticServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" } | Select-Object -ExpandProperty Name
