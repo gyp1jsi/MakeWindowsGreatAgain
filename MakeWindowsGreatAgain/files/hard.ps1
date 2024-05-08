@@ -1872,7 +1872,7 @@ if($confirm -eq "y"){
     Write-Output "Setting IRP Stack Size"
     reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "IRPStackSize" /t REG_DWORD /d "20" /f
     timeout /t 1 /nobreak > NUL
-cmd -c for /f %%n in ('Reg query "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}" /v "*SpeedDuplex" /s ^| findstr  "HKEY"') do {
+cmd -c "for /f %%n in ('Reg query "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}" /v "*SpeedDuplex" /s ^| findstr  "HKEY"') do {
     Write-Output "Disabling NIC Power Savings"
     reg add "%%n" /v "AutoPowerSaveModeEnabled" /t REG_SZ /d "0" /f
     reg add "%%n" /v "AutoDisableGigabit" /t REG_SZ /d "0" /f
@@ -1952,7 +1952,7 @@ cmd -c for /f %%n in ('Reg query "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4
     reg add "%%n" /v "*InterruptModeration" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
     
-}
+}"
     Write-Output "Enabling WH Send and Recieve"
     Get-NetAdapter -IncludeHidden | Set-NetIPInterface -WeakHostSend Enabled -WeakHostReceive Enabled -ErrorAction SilentlyContinue
     timeout /t 1 /nobreak > NUL
