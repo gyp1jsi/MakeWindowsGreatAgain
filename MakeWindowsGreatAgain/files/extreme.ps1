@@ -1152,6 +1152,7 @@ Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 
 if ($confirm -eq "y") {
+    # Thanks to he3als: https://github.com/he3als/EdgeRemover
     function Uninstall-MsiexecAppByName {
         param(
             [Parameter(Mandatory = $true)]
