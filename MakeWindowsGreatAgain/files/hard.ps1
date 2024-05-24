@@ -1872,84 +1872,84 @@ if($confirm -eq "y"){
     Write-Output "Setting IRP Stack Size"
     reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "IRPStackSize" /t REG_DWORD /d "20" /f
     timeout /t 1 /nobreak > NUL
-cmd -c "for /f %%n in ('Reg query "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}" /v "*SpeedDuplex" /s ^| findstr  "HKEY"') do {
+cmd -c "for /f "$($key.Trim())" in ('Reg query "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}" /v "*SpeedDuplex" /s ^| findstr  "HKEY"') do {
     Write-Output "Disabling NIC Power Savings"
-    reg add "%%n" /v "AutoPowerSaveModeEnabled" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "AutoDisableGigabit" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "AdvancedEEE" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "DisableDelayedPowerUp" /t REG_SZ /d "2" /f
-    reg add "%%n" /v "*EEE" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EEE" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnablePME" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EEELinkAdvertisement" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnableGreenEthernet" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnableSavePowerNow" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnablePowerManagement" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnableDynamicPowerGating" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnableConnectedPowerGating" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "EnableWakeOnLan" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "GigaLite" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "NicAutoPowerSaver" /t REG_SZ /d "2" /f
-    reg add "%%n" /v "PowerDownPll" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "PowerSavingMode" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "ReduceSpeedOnPowerDown" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "SmartPowerDownEnable" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "S5NicKeepOverrideMacAddrV2" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "S5WakeOnLan" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "ULPMode" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "WakeOnDisconnect" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "*WakeOnMagicPacket" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "*WakeOnPattern" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "WakeOnLink" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "WolShutdownLinkSpeed" /t REG_SZ /d "2" /f
+    reg add ""$($key.Trim())"" /v "AutoPowerSaveModeEnabled" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "AutoDisableGigabit" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "AdvancedEEE" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "DisableDelayedPowerUp" /t REG_SZ /d "2" /f
+    reg add ""$($key.Trim())"" /v "*EEE" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EEE" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnablePME" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EEELinkAdvertisement" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnableGreenEthernet" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnableSavePowerNow" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnablePowerManagement" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnableDynamicPowerGating" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnableConnectedPowerGating" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "EnableWakeOnLan" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "GigaLite" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "NicAutoPowerSaver" /t REG_SZ /d "2" /f
+    reg add ""$($key.Trim())"" /v "PowerDownPll" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "PowerSavingMode" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "ReduceSpeedOnPowerDown" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "SmartPowerDownEnable" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "S5NicKeepOverrideMacAddrV2" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "S5WakeOnLan" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "ULPMode" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "WakeOnDisconnect" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "*WakeOnMagicPacket" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "*WakeOnPattern" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "WakeOnLink" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "WolShutdownLinkSpeed" /t REG_SZ /d "2" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Disabling Jumbo Frame"
-    reg add "%%n" /v "JumboPacket" /t REG_SZ /d "1514" /f
+    reg add ""$($key.Trim())"" /v "JumboPacket" /t REG_SZ /d "1514" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Configuring Buffer Sizes"
-    reg add "%%n" /v "TransmitBuffers" /t REG_SZ /d "4096" /f
-    reg add "%%n" /v "ReceiveBuffers" /t REG_SZ /d "512" /f
+    reg add ""$($key.Trim())"" /v "TransmitBuffers" /t REG_SZ /d "4096" /f
+    reg add ""$($key.Trim())"" /v "ReceiveBuffers" /t REG_SZ /d "512" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Configuring Offloads"
-    reg add "%%n" /v "IPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "LsoV1IPv4" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "LsoV2IPv4" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "LsoV2IPv6" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "PMARPOffload" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "PMNSOffload" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "TCPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "TCPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "UDPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "UDPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "IPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "LsoV1IPv4" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "LsoV2IPv4" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "LsoV2IPv6" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "PMARPOffload" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "PMNSOffload" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "TCPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "TCPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "UDPChecksumOffloadIPv6" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "UDPChecksumOffloadIPv4" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
     
     Write-Output "Enabling RSS in NIC"
-    reg add "%%n" /v "RSS" /t REG_SZ /d "1" /f
-    reg add "%%n" /v "*NumRssQueues" /t REG_SZ /d "2" /f
-    reg add "%%n" /v "RSSProfile" /t REG_SZ /d "3" /f
+    reg add ""$($key.Trim())"" /v "RSS" /t REG_SZ /d "1" /f
+    reg add ""$($key.Trim())"" /v "*NumRssQueues" /t REG_SZ /d "2" /f
+    reg add ""$($key.Trim())"" /v "RSSProfile" /t REG_SZ /d "3" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Disabling Flow Control"
-    reg add "%%n" /v "*FlowControl" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "FlowControlCap" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "*FlowControl" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "FlowControlCap" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Removing Interrupt Delays"
-    reg add "%%n" /v "TxIntDelay" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "TxAbsIntDelay" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "RxIntDelay" /t REG_SZ /d "0" /f
-    reg add "%%n" /v "RxAbsIntDelay" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "TxIntDelay" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "TxAbsIntDelay" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "RxIntDelay" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "RxAbsIntDelay" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Removing Adapter Notification Sending"
-    reg add "%%n" /v "FatChannelIntolerant" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "FatChannelIntolerant" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
 
     Write-Output "Disabling Interrupt Moderation"
-    reg add "%%n" /v "*InterruptModeration" /t REG_SZ /d "0" /f
+    reg add ""$($key.Trim())"" /v "*InterruptModeration" /t REG_SZ /d "0" /f
     timeout /t 1 /nobreak > NUL
     
 }"
