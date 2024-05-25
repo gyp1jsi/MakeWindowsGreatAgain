@@ -277,7 +277,6 @@ Write-Output "Do you want to optimize privacy settings? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output 'Windows will never again track you.'
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\utils\"individual-tweaks.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
@@ -300,7 +299,7 @@ function Optimize-Privacy() {
     $TweakType = "Privacy"
 
     If ($Revert) {
-        Write-Status -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Output -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'." -Warning
         $Zero = 1
         $One = 0
         $EnableStatus = @(
@@ -310,19 +309,11 @@ function Optimize-Privacy() {
     }
 
     # Initialize all Path variables used to Registry Tweaks
-    $PathToLMAutoLogger = "HKLM:\SYSTEM\CurrentControlSet\Control\WMI\AutoLogger"
-    $PathToLMDeliveryOptimizationCfg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config"
     $PathToLMPoliciesAdvertisingInfo = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo"
-    $PathToLMPoliciesSQMClient = "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient\Windows"
-    $PathToLMPoliciesToWifi = "HKLM:\Software\Microsoft\PolicyManager\default\WiFi"
-    $PathToLMPoliciesWindowsUpdate = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
-    $PathToLMWindowsTroubleshoot = "HKLM:\SOFTWARE\Microsoft\WindowsMitigation"
     $PathToCUContentDeliveryManager = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
     $PathToCUDeviceAccessGlobal = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceAccess\Global"
-    $PathToCUExplorerAdvanced = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
     $PathToCUInputPersonalization = "HKCU:\SOFTWARE\Microsoft\InputPersonalization"
     $PathToCUInputTIPC = "HKCU:\SOFTWARE\Microsoft\Input\TIPC"
-    $PathToCUPoliciesCloudContent = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
     $PathToCUSiufRules = "HKCU:\SOFTWARE\Microsoft\Siuf\Rules"
 
     Write-Title -Text "Privacy Tweaks"
@@ -334,13 +325,13 @@ function Optimize-Privacy() {
         Enable-Cortana
     }
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) File Explorer Ads (OneDrive, New Features etc.)..."
-    Set-ItemProperty -Path "$PathToCUExplorerAdvanced" -Name "ShowSyncProviderNotifications" -Type DWord -Value $Zero
+    Write-Output "Removing File Explorer Ads (OneDrive, New Features etc.)..."
+    Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowSyncProviderNotifications" -Type DWord -Value 0
 
     Write-Section -Text "Personalization"
     Write-Caption -Text "Start & Lockscreen"
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Show me the windows welcome experience after updates..."
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Get fun facts and tips, etc. on lock screen'..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Show me the windows welcome experience after updates..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Get fun facts and tips, etc. on lock screen'..."
 
     $ContentDeliveryManagerDisableOnZero = @(
         "SubscribedContent-310093Enabled"
@@ -366,18 +357,18 @@ function Optimize-Privacy() {
         "SystemPaneSuggestionsEnabled"
     )
 
-    Write-Status -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager" -Warning
+    Write-Output -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager" -Warning
     ForEach ($Name in $ContentDeliveryManagerDisableOnZero) {
-        Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) $($Name): $Zero"
+        Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) $($Name): $Zero"
         Set-ItemProperty -Path "$PathToCUContentDeliveryManager" -Name "$Name" -Type DWord -Value $Zero
     }
 
-    Write-Status -Types "-", $TweakType -Status "Disabling 'Suggested Content in the Settings App'..."
+    Write-Output -Types "-", $TweakType -Status "Disabling 'Suggested Content in the Settings App'..."
     If (Test-Path "$PathToCUContentDeliveryManager\Subscriptions") {
         Remove-Item -Path "$PathToCUContentDeliveryManager\Subscriptions" -Recurse
     }
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Show Suggestions' in Start..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Show Suggestions' in Start..."
     If (Test-Path "$PathToCUContentDeliveryManager\SuggestedApps") {
         Remove-Item -Path "$PathToCUContentDeliveryManager\SuggestedApps" -Recurse
     }
@@ -386,14 +377,14 @@ function Optimize-Privacy() {
 
     Write-Section -Text "Privacy -> Windows Permissions"
     Write-Caption -Text "General"
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Let apps use my advertising ID..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Let apps use my advertising ID..."
     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Name "Enabled" -Type DWord -Value $Zero
     If (!(Test-Path "$PathToLMPoliciesAdvertisingInfo")) {
         New-Item -Path "$PathToLMPoliciesAdvertisingInfo" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToLMPoliciesAdvertisingInfo" -Name "DisabledByGroupPolicy" -Type DWord -Value $One
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Let websites provide locally relevant content by accessing my language list'..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'Let websites provide locally relevant content by accessing my language list'..."
     Set-ItemProperty -Path "HKCU:\Control Panel\International\User Profile" -Name "HttpAcceptLanguageOptOut" -Type DWord -Value $One
 
     Write-Caption -Text "Speech"
@@ -416,22 +407,22 @@ function Optimize-Privacy() {
         Enable-Telemetry
     }
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) send inking and typing data to Microsoft..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) send inking and typing data to Microsoft..."
     If (!(Test-Path "$PathToCUInputTIPC")) {
         New-Item -Path "$PathToCUInputTIPC" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToCUInputTIPC" -Name "Enabled" -Type DWord -Value $Zero
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Improve Inking & Typing Recognition..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Improve Inking & Typing Recognition..."
     If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput")) {
         New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput" -Force | Out-Null
     }
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput" -Name "AllowLinguisticDataCollection" -Type DWord -Value $Zero
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) View diagnostic data..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) View diagnostic data..."
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack\EventTranscriptKey" -Name "EnableEventTranscript" -Type DWord -Value $Zero
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) feedback frequency..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) feedback frequency..."
     If (!(Test-Path "$PathToCUSiufRules")) {
         New-Item -Path "$PathToCUSiufRules" -Force | Out-Null
     }
@@ -466,7 +457,7 @@ function Optimize-Privacy() {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation" -Name "Value" -Value "Deny"
 
     Write-Caption -Text "Other Devices"
-    Write-Status -Types "-", $TweakType -Status "Denying device access..."
+    Write-Output -Types "-", $TweakType -Status "Denying device access..."
     If (!(Test-Path "$PathToCUDeviceAccessGlobal\LooselyCoupled")) {
         New-Item -Path "$PathToCUDeviceAccessGlobal\LooselyCoupled" -Force | Out-Null
     }
@@ -476,24 +467,15 @@ function Optimize-Privacy() {
         If ($key.PSChildName -EQ "LooselyCoupled") {
             Continue
         }
-        Write-Status -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Setting $($key.PSChildName) value to 'Deny' ..."
+        Write-Output -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Setting $($key.PSChildName) value to 'Deny' ..."
         Set-ItemProperty -Path ("$PathToCUDeviceAccessGlobal\" + $key.PSChildName) -Name "Value" -Value "Deny"
     }
 
     Write-Caption -Text "Background Apps"
     Enable-BackgroundAppsToogle
-
-    Write-Section -Text "Update & Security"
-    Write-Caption -Text "Windows Update"
-    Write-Status -Types "-", $TweakType -Status "Disabling Automatic Download and Installation of Windows Updates..."
-    If (!(Test-Path "$PathToLMPoliciesWindowsUpdate")) {
-        New-Item -Path "$PathToLMPoliciesWindowsUpdate" -Force | Out-Null
     }
-    # [@] (2 = Notify before download, 3 = Automatically download and notify of installation)
-    # [@] (4 = Automatically download and schedule installation, 5 = Automatic Updates is required and users can configure it)
-    Set-ItemProperty -Path "$PathToLMPoliciesWindowsUpdate" -Name "AUOptions" -Type DWord -Value 2
 
-    Write-Status -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Restricting Windows Update P2P downloads for Local Network only..."
+    Write-Output -Types $EnableStatus[1].Symbol, $TweakType -Status "$($EnableStatus[1].Status) Restricting Windows Update P2P downloads for Local Network only..."
     If (!(Test-Path "$PathToLMDeliveryOptimizationCfg")) {
         New-Item -Path "$PathToLMDeliveryOptimizationCfg" -Force | Out-Null
     }
@@ -502,13 +484,13 @@ function Optimize-Privacy() {
     Set-ItemProperty -Path "$PathToLMDeliveryOptimizationCfg" -Name "DODownloadMode" -Type DWord -Value $One
 
     Write-Caption -Text "Troubleshooting"
-    Write-Status -Types "+", $TweakType -Status "Enabling Automatic Recommended Troubleshooting, then notify me..."
+    Write-Output -Types "+", $TweakType -Status "Enabling Automatic Recommended Troubleshooting, then notify me..."
     If (!(Test-Path "$PathToLMWindowsTroubleshoot")) {
         New-Item -Path "$PathToLMWindowsTroubleshoot" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToLMWindowsTroubleshoot" -Name "UserPreference" -Type DWord -Value 3
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Windows Spotlight Features..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Windows Spotlight Features..."
     If (!(Test-Path "$PathToCUPoliciesCloudContent")) {
         New-Item -Path "$PathToCUPoliciesCloudContent" -Force | Out-Null
     }
@@ -519,16 +501,16 @@ function Optimize-Privacy() {
     Set-ItemProperty -Path "$PathToCUPoliciesCloudContent" -Name "DisableWindowsSpotlightOnSettings" -Type DWord -Value $One
     Set-ItemProperty -Path "$PathToCUPoliciesCloudContent" -Name "DisableWindowsSpotlightWindowsWelcomeExperience" -Type DWord -Value $One
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Tailored Experiences..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Tailored Experiences..."
     Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" -Name "TailoredExperiencesWithDiagnosticDataEnabled" -Type DWord -Value $Zero
     Set-ItemProperty -Path "$PathToCUPoliciesCloudContent" -Name "DisableTailoredExperiencesWithDiagnosticData" -Type DWord -Value $One
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Third Party Suggestions..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) Third Party Suggestions..."
     Set-ItemProperty -Path "$PathToCUPoliciesCloudContent" -Name "DisableThirdPartySuggestions" -Type DWord -Value $One
     Set-ItemProperty -Path "$PathToCUPoliciesCloudContent" -Name "DisableWindowsConsumerFeatures" -Type DWord -Value $One
 
     # Reference: https://forums.guru3d.com/threads/windows-10-registry-tweak-for-disabling-drivers-auto-update-controversy.418033/
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) automatic driver updates..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) automatic driver updates..."
     # [@] (0 = Yes, do this automatically, 1 = No, let me choose what to do, Always install the best, 2 = [...] Install driver software from Windows Update, 3 = [...] Never install driver software from Windows Update
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Type DWord -Value $One
     # [@] (0 = Enhanced icons enabled, 1 = Enhanced icons disabled)
@@ -542,79 +524,117 @@ function Optimize-Privacy() {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat" -Name "DisableUAR" -Type DWord -Value $One
 
     # Details: https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/rds-vdi-recommendations-2004#windows-system-startup-event-traces-autologgers
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) some startup event traces (AutoLoggers)..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) some startup event traces (AutoLoggers)..."
     If (!(Test-Path "$PathToLMAutoLogger\AutoLogger-Diagtrack-Listener")) {
         New-Item -Path "$PathToLMAutoLogger\AutoLogger-Diagtrack-Listener" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToLMAutoLogger\AutoLogger-Diagtrack-Listener" -Name "Start" -Type DWord -Value $Zero
     Set-ItemProperty -Path "$PathToLMAutoLogger\SQMLogger" -Name "Start" -Type DWord -Value $Zero
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'WiFi Sense: HotSpot Sharing'..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'WiFi Sense: HotSpot Sharing'..."
     If (!(Test-Path "$PathToLMPoliciesToWifi\AllowWiFiHotSpotReporting")) {
         New-Item -Path "$PathToLMPoliciesToWifi\AllowWiFiHotSpotReporting" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToLMPoliciesToWifi\AllowWiFiHotSpotReporting" -Name "value" -Type DWord -Value $Zero
 
-    Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'WiFi Sense: Shared HotSpot Auto-Connect'..."
+    Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) 'WiFi Sense: Shared HotSpot Auto-Connect'..."
     If (!(Test-Path "$PathToLMPoliciesToWifi\AllowAutoConnectToWiFiSenseHotspots")) {
         New-Item -Path "$PathToLMPoliciesToWifi\AllowAutoConnectToWiFiSenseHotspots" -Force | Out-Null
     }
     Set-ItemProperty -Path "$PathToLMPoliciesToWifi\AllowAutoConnectToWiFiSenseHotspots" -Name "value" -Type DWord -Value $Zero
-}
-}
 
+    Write-Output "Disabling Office Telemetry"
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "accesssolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "olksolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "onenotesolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "pptsolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "projectsolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "publishersolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "visiosolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "wdsolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedapplications" -Name "xlsolution" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedsolutiontypes" -Name "agave" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedsolutiontypes" -Name "appaddins" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedsolutiontypes" -Name "comaddins" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedsolutiontypes" -Name "documentfiles" -Type DWord -Value 1
+    Set-ItemProperty -Path "HKEY_CURRENT_USER\Software\Policies\microsoft\office\16.0\osm\preventedsolutiontypes" -Name "templatefiles" -Type DWord -Value 1
+
+    Write-Output "Disabling telemetry tasks"
+    schtasks /end /tn "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
+schtasks /change /tn "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator" /disable
+schtasks /end /tn "\Microsoft\Windows\Customer Experience Improvement Program\BthSQM"
+schtasks /change /tn "\Microsoft\Windows\Customer Experience Improvement Program\BthSQM" /disable
+schtasks /end /tn "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
+schtasks /change /tn "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask" /disable
+schtasks /end /tn "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
+schtasks /change /tn "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip" /disable
+schtasks /end /tn "\Microsoft\Windows\Customer Experience Improvement Program\Uploader"
+schtasks /change /tn "\Microsoft\Windows\Customer Experience Improvement Program\Uploader" /disable
+schtasks /end /tn "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+schtasks /change /tn "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser" /disable
+schtasks /end /tn "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+schtasks /change /tn "\Microsoft\Windows\Application Experience\ProgramDataUpdater" /disable
+schtasks /end /tn "\Microsoft\Windows\Application Experience\StartupAppTask"
+schtasks /change /tn "\Microsoft\Windows\Application Experience\StartupAppTask" /disable
+schtasks /end /tn "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
+schtasks /change /tn "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector" /disable
+schtasks /end /tn "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticResolver"
+schtasks /change /tn "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticResolver" /disable
+schtasks /end /tn "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
+schtasks /change /tn "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem" /disable
+schtasks /end /tn "\Microsoft\Windows\Shell\FamilySafetyMonitor"
+schtasks /change /tn "\Microsoft\Windows\Shell\FamilySafetyMonitor" /disable
+schtasks /end /tn "\Microsoft\Windows\Shell\FamilySafetyRefresh"
+schtasks /change /tn "\Microsoft\Windows\Shell\FamilySafetyRefresh" /disable
+schtasks /end /tn "\Microsoft\Windows\Shell\FamilySafetyUpload"
+schtasks /change /tn "\Microsoft\Windows\Shell\FamilySafetyUpload" /disable
+schtasks /end /tn "\Microsoft\Windows\Autochk\Proxy"
+schtasks /change /tn "\Microsoft\Windows\Autochk\Proxy" /disable
+schtasks /end /tn "\Microsoft\Windows\Maintenance\WinSAT"
+schtasks /change /tn "\Microsoft\Windows\Maintenance\WinSAT" /disable
+schtasks /end /tn "\Microsoft\Windows\Application Experience\AitAgent"
+schtasks /change /tn "\Microsoft\Windows\Application Experience\AitAgent" /disable
+schtasks /end /tn "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
+schtasks /change /tn "\Microsoft\Windows\Windows Error Reporting\QueueReporting" /disable
+schtasks /end /tn "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
+schtasks /change /tn "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask" /disable
+schtasks /end /tn "\Microsoft\Windows\DiskFootprint\Diagnostics"
+schtasks /change /tn "\Microsoft\Windows\DiskFootprint\Diagnostics" /disable
+schtasks /end /tn "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+schtasks /change /tn "\Microsoft\Windows\FileHistory\File History (maintenance mode)" /disable
+schtasks /end /tn "\Microsoft\Windows\PI\Sqm-Tasks"
+schtasks /change /tn "\Microsoft\Windows\PI\Sqm-Tasks" /disable
+schtasks /end /tn "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
+schtasks /change /tn "\Microsoft\Windows\NetTrace\GatherNetworkInfo" /disable
+schtasks /end /tn "\Microsoft\Windows\AppID\SmartScreenSpecific"
+schtasks /change /tn "\Microsoft\Windows\AppID\SmartScreenSpecific" /disable
+schtasks /Change /TN "\Microsoft\Windows\WindowsUpdate\Automatic App Update" /Disable
+schtasks /Change /TN "\Microsoft\Windows\Time Synchronization\ForceSynchronizeTime" /Disable
+schtasks /Change /TN "\Microsoft\Windows\Time Synchronization\SynchronizeTime" /Disable
+schtasks /end /tn "\Microsoft\Windows\HelloFace\FODCleanupTask"
+schtasks /change /tn "\Microsoft\Windows\HelloFace\FODCleanupTask" /disable
+schtasks /end /tn "\Microsoft\Windows\Feedback\Siuf\DmClient"
+schtasks /change /tn "\Microsoft\Windows\Feedback\Siuf\DmClient" /disable
+schtasks /end /tn "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
+schtasks /change /tn "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload" /disable
+schtasks /end /tn "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+schtasks /change /tn "\Microsoft\Windows\Application Experience\PcaPatchDbTask" /disable
+schtasks /end /tn "\Microsoft\Windows\Device Information\Device"
+schtasks /change /tn "\Microsoft\Windows\Device Information\Device" /disable
+schtasks /end /tn "\Microsoft\Windows\Device Information\Device User"
+schtasks /change /tn "\Microsoft\Windows\Device Information\Device User" /disable
+
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
+
+Write-Output "Disabling Let’s finish setting up your device screen..."
+Set-ItemProperty -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" -Name "ScoobeSystemSettingEnabled" -Type DWord -Value 0
+Set-ItemProperty -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-310093Enabled" -Type DWord -Value 0
+Set-ItemProperty -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -Type DWord -Value 0
+}
 else {
-    Write-Output "Windows will keep looking into your PC for no reason."
+    Write-Output "Windows will keep spying on you. Ratio."
 }
-
-Write-Caption "Deleting useless registry keys..."
-$KeysToDelete = @(
-    # Remove Background Tasks
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\46928bounde.EclipseManager_2.2.4.51_neutral__a5h4egax66k6y"
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.MicrosoftOfficeHub_17.7909.7600.0_x64__8wekyb3d8bbwe"
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
-    # Microsoft Edge keys
-    "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge"
-    "HKLM:\Software\Wow6432Node\Clients\StartMenuInternet\Microsoft Edge"
-    "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update"
-    # Windows File
-    "HKCR:\Extensions\ContractId\Windows.File\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
-    # Registry keys to delete if they aren't uninstalled by RemoveAppXPackage/RemoveAppXProvisionedPackage
-    "HKCR:\Extensions\ContractId\Windows.Launch\PackageId\46928bounde.EclipseManager_2.2.4.51_neutral__a5h4egax66k6y"
-    "HKCR:\Extensions\ContractId\Windows.Launch\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
-    "HKCR:\Extensions\ContractId\Windows.Launch\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.Launch\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.Launch\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
-    # Scheduled Tasks to delete
-    "HKCR:\Extensions\ContractId\Windows.PreInstalledConfigTask\PackageId\Microsoft.MicrosoftOfficeHub_17.7909.7600.0_x64__8wekyb3d8bbwe"
-    # Windows Protocol Keys
-    "HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
-    "HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
-    "HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
-    # Windows Share Target
-    "HKCR:\Extensions\ContractId\Windows.ShareTarget\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
-)
-ForEach ($Key in $KeysToDelete) {
-    If ((Test-Path $Key)) {
-        Write-Status -Types "-", $TweakType -Status "Removing Key: [$Key]"
-        Remove-Item $Key -Recurse
-    } Else {
-        Write-Status -Types "?", $TweakType -Status "The registry key $Key does not exist" -Warning
-    }
-}
-
-function Main() {
-If (!$Revert) {
-    Optimize-Privacy # Disable Registries that causes slowdowns and privacy invasion
-} Else {
-    Optimize-Privacy -Revert
-}
-}
-Main
 
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
