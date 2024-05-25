@@ -1263,8 +1263,6 @@ $provisioned = Get-AppxProvisionedPackage -Online
 $appxpackage = Get-AppxPackage -AllUsers
 $eol = @()
 
-$store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Store'
-$storeP = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Store\InstalledApplications'
 foreach ($app in $appxpackage) {
     $name = $app.Name
     if ($app.Name -eq "Microsoft.Edge") {
@@ -1341,7 +1339,6 @@ foreach ($entryType in $edgePrefs.Keys) {
 Write-Host "Edge Removal Complete" -ForegroundColor Green
 
 # Define constants and initial configuration
-$ScriptVersion = "2023.05.10"
 $EdgeProcessesToShutdown = @('explorer', 'Widgets', 'widgetservice', 'msedgewebview2', 'MicrosoftEdge*', 'chredge', 'msedge', 'edge', 'msteams', 'msfamily', 'WebViewHost', 'Clipchamp')
 $EdgeRemovalOptions = @{
     RemoveWin32 = @("Microsoft Edge", "Microsoft Edge Update")
