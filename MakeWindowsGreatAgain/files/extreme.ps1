@@ -1409,7 +1409,7 @@ Remove-MicrosoftEdge
 Write-Output "Do you want to disable Teredo? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    cmd -c netsh interface teredo set state disabled
+    netsh interface teredo set state disabled
 }
 else {
     Write-Output "Teredo will not be disabled."
