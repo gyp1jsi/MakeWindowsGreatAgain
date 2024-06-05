@@ -1217,7 +1217,7 @@ if ($confirm -eq "y") {
 }
 
 
-#Removes Microsoft Edge
+# Removes Microsoft Edge (thanks to Chris Titus Tech)
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 
