@@ -2100,3 +2100,4 @@ if($confirm -eq "y"){
 else {
     Write-Output "Network connectivity will not be optimized."
 }
+timeout /t 2

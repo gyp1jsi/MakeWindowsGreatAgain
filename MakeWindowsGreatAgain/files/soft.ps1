@@ -830,3 +830,4 @@ if($confirm -eq "y"){
 else {
     Write-Output "Windows updates will not be set to security only."
 }
+timeout /t 2
