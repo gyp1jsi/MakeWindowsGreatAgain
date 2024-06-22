@@ -1,6 +1,6 @@
 $host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Menu)"
 # Define the folder where the scripts are located
-$folderPath = Join-Path $scriptPath "files"
+$folderPath = "$PSScriptRoot\files"
 # Define the files name
 $services = "services.ps1"
 $store = "store.ps1"
