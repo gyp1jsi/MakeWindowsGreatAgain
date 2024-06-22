@@ -299,7 +299,7 @@ function Optimize-Privacy() {
     $TweakType = "Privacy"
 
     If ($Revert) {
-        Write-Output -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Output -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'."
         $Zero = 1
         $One = 0
         $EnableStatus = @(
@@ -357,7 +357,7 @@ function Optimize-Privacy() {
         "SystemPaneSuggestionsEnabled"
     )
 
-    Write-Output -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager" -Warning
+    Write-Output -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager"
     ForEach ($Name in $ContentDeliveryManagerDisableOnZero) {
         Write-Output -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) $($Name): $Zero"
         Set-ItemProperty -Path "$PathToCUContentDeliveryManager" -Name "$Name" -Type DWord -Value $Zero
@@ -1115,7 +1115,7 @@ function Optimize-ServicesRunning() {
 
     Set-ServiceStartup -Manual -Services $ServicesToManual
     If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'."
         $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
         Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD $EnableServicesOnWindows11 -CustomMessage $CustomMessage
     } Else {
@@ -1480,7 +1480,7 @@ function Optimize-TaskScheduler() {
     Write-Section -Text "Disabling Scheduled Tasks from Windows"
 
     If ($Revert) {
-        Write-Status -Types "*", "TaskScheduler" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", "TaskScheduler" -Status "Reverting the tweaks is set to '$Revert'."
         $CustomMessage = { "Resetting the $ScheduledTask task as 'Ready' ..." }
         Set-ScheduledTaskState -Ready -ScheduledTask $DisableScheduledTasks -CustomMessage $CustomMessage
     } Else {

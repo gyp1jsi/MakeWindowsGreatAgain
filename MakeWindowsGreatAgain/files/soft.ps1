@@ -209,7 +209,7 @@ function Optimize-Privacy() {
     $TweakType = "Privacy"
 
     If ($Revert) {
-        Write-Status -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'."
         $Zero = 1
         $One = 0
         $EnableStatus = @(
@@ -275,7 +275,7 @@ function Optimize-Privacy() {
         "SystemPaneSuggestionsEnabled"
     )
 
-    Write-Status -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager" -Warning
+    Write-Status -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager"
     ForEach ($Name in $ContentDeliveryManagerDisableOnZero) {
         Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) $($Name): $Zero"
         Set-ItemProperty -Path "$PathToCUContentDeliveryManager" -Name "$Name" -Type DWord -Value $Zero
@@ -531,7 +531,7 @@ ForEach ($Key in $KeysToDelete) {
         Write-Status -Types "-", $TweakType -Status "Removing Key: [$Key]"
         Remove-Item $Key -Recurse
     } Else {
-        Write-Status -Types "?", $TweakType -Status "The registry key $Key does not exist" -Warning
+        Write-Status -Types "?", $TweakType -Status "The registry key $Key does not exist"
     }
 }
 
@@ -761,7 +761,7 @@ function Optimize-ServicesRunning() {
     Write-Section -Text "Disabling services from Windows"
 
     If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'."
         $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
         Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD -CustomMessage $CustomMessage
     } Else {
