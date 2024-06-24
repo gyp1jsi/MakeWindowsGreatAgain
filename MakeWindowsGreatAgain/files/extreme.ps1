@@ -684,7 +684,86 @@ If (!$Revert) {
     Optimize-Privacy -Revert
 }
 }
-Main
+
+Write-Output "Do you want to optimize security? (y/n)"
+$confirm = Read-Host
+if ($confirm -eq "y"){
+    # Thanks to Win-Debloat-Tools: https://github.com/LeDragoX/Win-Debloat-Tools/blob/main/src/scripts/Optimize-Security.ps1
+Import-Module -DisableNameChecking "$PSScriptRoot\lib\Get-HardwareInfo.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\lib\Title-Templates.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\utils\Individual-Tweaks.psm1"
+
+# Adapted from: https://youtu.be/xz3oXHleKoM
+# Adapted from: https://github.com/ChrisTitusTech/win10script
+# Adapted from: https://github.com/kalaspuffar/windows-debloat
+
+function Optimize-Security() {
+    $TweakType = "Security"
+    # Initialize all Path variables used to Registry Tweaks
+    $PathToLMPoliciesEdge = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge"
+    $PathToLMPoliciesMRT = "HKLM:\SOFTWARE\Policies\Microsoft\MRT"
+    $PathToCUExplorer = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer"
+    $PathToCUExplorerAdvanced = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+    Write-Title "Security Tweaks"
+
+    Write-Section "Windows Firewall"
+    Write-Status -Types "+", $TweakType -Status "Enabling default firewall profiles..."
+    Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+
+    Write-Section "Windows Defender"
+    Write-Status -Types "?", $TweakType -Status "If you already use another antivirus, nothing will happen." -Warning
+    Write-Status -Types "+", $TweakType -Status "Ensuring your Windows Defender is ENABLED..."
+    Set-ItemPropertyVerified -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Type DWORD -Value 0
+    Set-MpPreference -DisableRealtimeMonitoring $false -Force
+
+    Write-Status -Types "+", $TweakType -Status "Enabling Microsoft Defender Exploit Guard network protection..."
+    Set-MpPreference -EnableNetworkProtection Enabled -Force
+
+    Write-Status -Types "+", $TweakType -Status "Enabling detection for potentially unwanted applications and block them..."
+    Set-MpPreference -PUAProtection Enabled -Force
+
+    Write-Section "SmartScreen"
+    Write-Status -Types "+", $TweakType -Status "Enabling 'SmartScreen' for Microsoft Edge..."
+    Set-ItemPropertyVerified -Path "$PathToLMPoliciesEdge\PhishingFilter" -Name "EnabledV9" -Type DWord -Value 1
+
+    Write-Status -Types "+", $TweakType -Status "Enabling 'SmartScreen' for Store Apps..."
+    Set-ItemPropertyVerified -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" -Name "EnableWebContentEvaluation" -Type DWord -Value 1
+
+    Write-Section "Old SMB Protocol"
+    # Details: https://techcommunity.microsoft.com/t5/storage-at-microsoft/stop-using-smb1/ba-p/425858
+    Write-Status -Types "+", $TweakType -Status "Disabling SMB 1.0 protocol..."
+    Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force
+
+    Write-Section "Autoplay and Autorun (Removable Devices)"
+    Write-Status -Types "-", $TweakType -Status "Disabling Autoplay..."
+    Set-ItemPropertyVerified -Path "$PathToCUExplorer\AutoplayHandlers" -Name "DisableAutoplay" -Type DWord -Value 1
+
+    Write-Status -Types "-", $TweakType -Status "Disabling Autorun for all Drives..."
+    Set-ItemPropertyVerified -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoDriveTypeAutoRun" -Type DWord -Value 255
+
+    Write-Section "Microsoft Store"
+    Disable-SearchAppForUnknownExt
+
+    Write-Section "Windows Explorer"
+    Write-Status -Types "+", $TweakType -Status "Enabling Show file extensions in Explorer..."
+    Set-ItemPropertyVerified -Path "$PathToCUExplorerAdvanced" -Name "HideFileExt" -Type DWord -Value 0
+
+    Write-Section "User Account Control (UAC)"
+    # Details: https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings
+    Write-Status -Types "+", $TweakType -Status "Raising UAC level..."
+    Set-ItemPropertyVerified -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Type DWord -Value 5
+    Set-ItemPropertyVerified -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "PromptOnSecureDesktop" -Type DWord -Value 1
+
+    Write-Section "Windows Update"
+    # Details: https://forums.malwarebytes.com/topic/246740-new-potentially-unwanted-modification-disablemrt/
+    Write-Status -Types "+", $TweakType -Status "Enabling offer Malicious Software Removal Tool via Windows Update..."
+    Set-ItemPropertyVerified -Path "$PathToLMPoliciesMRT" -Name "DontOfferThroughWUAU" -Type DWord -Value 0
+}
+} else {
+    Write-Output "Security will not be optimized."
+}
 
 Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
@@ -1217,261 +1296,77 @@ if ($confirm -eq "y") {
 }
 
 
-# Removes Microsoft Edge (thanks to Chris Titus Tech)
+# Removes Microsoft Edge (thanks to Win-Debloat-Tools)
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
-
 if ($confirm -eq "y") {
-# Script Metadata
-# Created by AveYo, source: https://raw.githubusercontent.com/AveYo/fox/main/Edge_Removal.bat
-# Thanks to Chris Titus Tech: https://github.com/ChrisTitusTech/winutil
-
-# Initial Configuration
-$remove_win32 = @("Microsoft Edge", "Microsoft Edge Update")
-$remove_appx = @("MicrosoftEdge")
-$skip = @() # Optional: @("DevTools")
-
-$also_remove_webview = 0
-if ($also_remove_webview -eq 1) {
-    $remove_win32 += "Microsoft EdgeWebView"
-    $remove_appx += "WebExperience", "Win32WebViewHost"
-}
-
-# Administrative Privileges Check
-$privileges = @(
-    'SeSecurityPrivilege',
-    'SeTakeOwnershipPrivilege',
-    'SeBackupPrivilege',
-    'SeRestorePrivilege'
-)
-
-foreach ($privilege in $privileges) {
-    [System.Diagnostics.Process]::SetPrivilege($privilege, 2)
-}
-
-# Edge Removal Procedures
-$processesToShutdown = @(
-    'explorer', 'Widgets', 'widgetservice', 'msedgewebview2', 'MicrosoftEdge*', 'chredge',
-    'msedge', 'edge', 'msteams', 'msfamily', 'WebViewHost', 'Clipchamp'
-)
-
-Stop-Process -Name "explorer" -Force -ErrorAction SilentlyContinue
-$processesToShutdown | ForEach-Object {
-    Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue
-}
-
-$MS = ($env:ProgramFiles, ${env:ProgramFiles(x86)})[[Environment]::Is64BitOperatingSystem] + '\Microsoft\Edge\Application\msedge.exe'
-
-Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\msedge.exe" -Recurse -ErrorAction SilentlyContinue
-Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\ie_to_edge_stub.exe" -Recurse -ErrorAction SilentlyContinue
-Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\microsoft-edge' -Recurse -ErrorAction SilentlyContinue
-Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\MSEdgeHTM' -Recurse -ErrorAction SilentlyContinue
-
-New-Item -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Force -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Name '(Default)' -Value "`"$MS`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
-
-New-Item -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Force -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Name '(Default)' -Value "`"$MS`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
-
-$registryPaths = @('HKLM:\SOFTWARE\Policies', 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node')
-$edgeProperties = @('InstallDefault', 'Install{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}', 'Install{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}')
-foreach ($path in $registryPaths) {
-    foreach ($prop in $edgeProperties) {
-        Remove-ItemProperty -Path "$path\Microsoft\EdgeUpdate" -Name $prop -Force -ErrorAction SilentlyContinue
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Title-Templates.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-ItemVerified.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-UWPApp.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Show-MessageDialog.psm1"
+    
+    function Remove-MSEdge() {
+        $PathToLMEdgeUpdate = "HKLM:\SOFTWARE\Microsoft\EdgeUpdate"
+        $PathToLMUninstallMSEdge = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge"
+        $PathToLMUninstallMSEdgeUpdate = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update"
+        $PathToLMUninstallMSEdgeWebView = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView"
+    
+        Write-Status -Types "+" -Status "Enabling uninstall button to Microsoft Edge..."
+        Set-ItemPropertyVerified -Path "$PathToLMUninstallMSEdge", "$PathToLMUninstallMSEdgeUpdate", "$PathToLMUninstallMSEdgeWebView" -Name "NoRemove" -Type DWord -Value 0
+    
+        Write-Status -Types "@" -Status "Stopping all 'msedge' processes before uninstalling..."
+        Get-Process -Name msedge | Stop-Process -PassThru -Force
+    
+        If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge\Application") {
+            ForEach ($FullName in (Get-ChildItem -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge*\Application\*\Installer\setup.exe").FullName) {
+                Write-Status -Types "@" -Status "Uninstalling MS Edge from $FullName..."
+                Start-Process -FilePath $FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait
+            }
+        } Else {
+            Write-Status -Types "?" -Status "Edge folder does not exist anymore..." -Warning
+        }
+    
+        If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore") {
+            ForEach ($FullName in (Get-ChildItem -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore\*\Installer\setup.exe").FullName) {
+                Write-Status -Types "@" -Status "Uninstalling MS Edge from $FullName..."
+                Start-Process -FilePath $FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait
+            }
+        } Else {
+            Write-Status -Types "?" -Status "EdgeCore folder does not exist anymore..." -Warning
+        }
+    
+        Remove-UWPApp -AppxPackages @("Microsoft.MicrosoftEdge", "Microsoft.MicrosoftEdge.Stable", "Microsoft.MicrosoftEdge.*", "Microsoft.MicrosoftEdgeDevToolsClient")
+        Set-ScheduledTaskState -State Disabled -ScheduledTasks @("\MicrosoftEdgeUpdateTaskMachineCore", "\MicrosoftEdgeUpdateTaskMachineUA", "\MicrosoftEdgeUpdateTaskUser*")
+        Set-ServiceStartup -State 'Disabled' -Services @("edgeupdate", "edgeupdatem", "MicrosoftEdgeElevationService")
+    
+        Write-Status -Types "@" -Status "Preventing Edge from reinstalling..."
+        Set-ItemPropertyVerified -Path "$PathToLMEdgeUpdate" -Name "DoNotUpdateToEdgeWithChromium" -Type DWord -Value 1
+    
+        Write-Status -Types "@" -Status "Deleting Edge appdata\local folders from current user..."
+        Remove-ItemVerified -Path "$env:LOCALAPPDATA\Packages\Microsoft.MicrosoftEdge*_*" -Recurse -Force | Out-Host
+    
+        Write-Status -Types "@" -Status "Deleting Edge from $env:SystemDrive\Program Files (x86)\Microsoft\..."
+        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge" -Recurse -Force | Out-Host
+        # Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore" -Recurse -Force | Out-Host
+        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force | Out-Host
+        # Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeWebView" -Recurse -Force | Out-Host
+        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Temp" -Recurse -Force | Out-Host
     }
-}
-
-$edgeupdate = 'Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}'
-$webvupdate = 'Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
-$on_actions = @('on-os-upgrade', 'on-logon', 'on-logon-autolaunch', 'on-logon-startup-boost')
-$registryBases = @('HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\Wow6432Node')
-foreach ($base in $registryBases) {
-    foreach ($launch in $on_actions) {
-        Remove-Item -Path "$base\$edgeupdate\Commands\$launch" -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "$base\$webvupdate\Commands\$launch" -Force -ErrorAction SilentlyContinue
-    }
-}
-
-$registryPaths = @('HKCU:', 'HKLM:')
-$nodes = @('', '\Wow6432Node')
-foreach ($regPath in $registryPaths) {
-    foreach ($node in $nodes) {
-        foreach ($i in $remove_win32) {
-            Remove-ItemProperty -Path "$regPath\SOFTWARE${node}\Microsoft\Windows\CurrentVersion\Uninstall\$i" -Name 'NoRemove' -Force -ErrorAction SilentlyContinue
-            New-Item -Path "$regPath\SOFTWARE${node}\Microsoft\EdgeUpdateDev" -Force | Out-Null
-            Set-ItemProperty -Path "$regPath\SOFTWARE${node}\Microsoft\EdgeUpdateDev" -Name 'AllowUninstall' -Value 1 -Type Dword -Force
+    
+    $Ask = "Are you sure you want to remove Microsoft Edge from Windows?`nWill uninstall WebView2 and thus break many PWA (Progressive Web App) applications`n(e.g., Snapchat, Instagram...)`n`nYou can reinstall Edge anytime.`nNote: all users logged in will remain."
+    
+    switch (Show-Question -Title "Warning" -Message $Ask -BoxIcon "Warning") {
+        'Yes' {
+            Remove-MSEdge
+        }
+        'No' {
+            Write-Host "Aborting..."
+        }
+        'Cancel' {
+            Write-Host "Aborting..." # With Yes, No and Cancel, the user can press Esc to exit
         }
     }
-}
-
-$foldersToSearch = @('LocalApplicationData', 'ProgramFilesX86', 'ProgramFiles') | ForEach-Object {
-    [Environment]::GetFolderPath($_)
-}
-
-$edges = @()
-$bhoFiles = @()
-
-foreach ($folder in $foldersToSearch) {
-    $bhoFiles += Get-ChildItem -Path "$folder\Microsoft\Edge*\ie_to_edge_stub.exe" -Recurse -ErrorAction SilentlyContinue
-
-    $edges += Get-ChildItem -Path "$folder\Microsoft\Edge*\setup.exe" -Recurse -ErrorAction SilentlyContinue |
-              Where-Object { $_.FullName -notlike '*EdgeWebView*' }
-}
-
-$destinationDir = "$env:SystemDrive\Scripts"
-New-Item -Path $destinationDir -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-
-foreach ($bhoFile in $bhoFiles) {
-    if (Test-Path $bhoFile) {
-        try {
-            Copy-Item -Path $bhoFile -Destination "$destinationDir\ie_to_edge_stub.exe" -Force
-        } catch { }
-    }
-}
-
-## Work on Appx Removals
-$provisioned = Get-AppxProvisionedPackage -Online
-$appxpackage = Get-AppxPackage -AllUsers
-$eol = @()
-
-foreach ($app in $appxpackage) {
-    $name = $app.Name
-    if ($app.Name -eq "Microsoft.Edge") {
-        $eol += $name
-    } elseif ($app.Name -eq "Microsoft.EdgeBeta" -or $app.Name -eq "Microsoft.EdgeDev" -or $app.Name -eq "Microsoft.EdgeCanary" -or $app.Name -eq "Microsoft.MicrosoftEdge") {
-        $eol += $name
-    }
-}
-
-$eolApps = $provisioned | Where-Object { $eol -contains $_.DisplayName }
-
-foreach ($edge in $eolApps) {
-    $edgeName = $edge.DisplayName
-    if (-not ($skip -contains $edgeName)) {
-        try {
-            Remove-AppxProvisionedPackage -Online -PackageName $edgeName -ErrorAction SilentlyContinue
-        } catch { }
-    }
-}
-
-foreach ($edge in $appxpackage) {
-    $edgeName = $edge.Name
-    if ($eol -contains $edgeName) {
-        if (-not ($skip -contains $edgeName)) {
-            try {
-                Remove-AppxPackage -Package $edgeName -AllUsers -ErrorAction SilentlyContinue
-            } catch { }
-        }
-    }
-}
-
-## Redirect shortcuts
-$shortcut_path = "$env:Public\Desktop"
-$shortcut_file = 'Microsoft Edge.lnk'
-$full_path = Join-Path -Path $shortcut_path -ChildPath $shortcut_file
-
-if (Test-Path $full_path) {
-    Remove-Item -Path $full_path -Force -ErrorAction SilentlyContinue
-}
-
-$shortcut_path = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs"
-$shortcut_file = 'Microsoft Edge.lnk'
-$full_path = Join-Path -Path $shortcut_path -ChildPath $shortcut_file
-
-if (Test-Path $full_path) {
-    Remove-Item -Path $full_path -Force -ErrorAction SilentlyContinue
-}
-
-$edgePolicy = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-if (-not (Test-Path $edgePolicy)) {
-    New-Item -Path $edgePolicy -Force | Out-Null
-}
-
-$edgePrefs = @{
-    'Dword' = @{
-        'BrowserReplacementEnabled' = 1
-        'HideFirstRunExperience' = 1
-        'HideImportEdgeFavoritesPrompt' = 1
-        'HideSyncSetupExperience' = 1
-        'FavoritesBarVisibility' = 1
-    }
-    'String' = @{
-        'AutoplayAllowed' = 'AllowOnce'
-    }
-}
-
-foreach ($entryType in $edgePrefs.Keys) {
-    foreach ($prefName in $edgePrefs[$entryType].Keys) {
-        Set-ItemProperty -Path $edgePolicy -Name $prefName -Value $edgePrefs[$entryType][$prefName] -Type $entryType -Force
-    }
-}
-
-# Output Results
-Write-Host "Edge Removal Complete" -ForegroundColor Green
-
-# Define constants and initial configuration
-$EdgeProcessesToShutdown = @('explorer', 'Widgets', 'widgetservice', 'msedgewebview2', 'MicrosoftEdge*', 'chredge', 'msedge', 'edge', 'msteams', 'msfamily', 'WebViewHost', 'Clipchamp')
-$EdgeRemovalOptions = @{
-    RemoveWin32 = @("Microsoft Edge", "Microsoft Edge Update")
-    RemoveAppx = @("MicrosoftEdge")
-    Skip = @() # Optional: @("DevTools")
-    AlsoRemoveWebView = $false
-}
-
-# Define main function to remove Microsoft Edge components
-function Remove-MicrosoftEdge {
-    [CmdletBinding()]
-    param()
-
-    # Function to shutdown processes related to Microsoft Edge
-    function Stop-EdgeProcesses {
-        $EdgeProcessesToShutdown | ForEach-Object {
-            Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue
-        }
-    }
-
-    # Function to remove registry entries related to Microsoft Edge
-    function Remove-EdgeRegistryEntries {
-        # Clean up certain registry entries
-        Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\msedge.exe" -Recurse -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\ie_to_edge_stub.exe" -Recurse -ErrorAction SilentlyContinue
-        Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\microsoft-edge' -Recurse -ErrorAction SilentlyContinue
-        Remove-Item -Path 'Registry::HKEY_Users\S-1-5-21*\Software\Classes\MSEdgeHTM' -Recurse -ErrorAction SilentlyContinue
-
-        # Create new registry entries
-        $EdgeExecutablePath = ($env:ProgramFiles, ${env:ProgramFiles(x86)})[[Environment]::Is64BitOperatingSystem] + '\Microsoft\Edge\Application\msedge.exe'
-        New-Item -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Force -ErrorAction SilentlyContinue
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\microsoft-edge\shell\open\command" -Name '(Default)' -Value "`"$EdgeExecutablePath`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
-
-        New-Item -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Force -ErrorAction SilentlyContinue
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\MSEdgeHTM\shell\open\command" -Name '(Default)' -Value "`"$EdgeExecutablePath`" --single-argument %%1" -Force -ErrorAction SilentlyContinue
-    }
-
-    # Function to remove Microsoft Edge AppX packages
-    function Remove-EdgeAppxPackages {
-        $EdgeRemovalOptions.RemoveAppx | ForEach-Object {
-            # Remove provisioned packages
-            Get-AppxProvisionedPackage -Online | Where-Object { $_.PackageName -like "*$_*" -and $EdgeRemovalOptions.Skip -notcontains $_.PackageName } | Remove-AppxProvisionedPackage -Online -AllUsers -ErrorAction SilentlyContinue
-
-            # Remove installed packages
-            Get-AppxPackage -AllUsers | Where-Object { $_.PackageFullName -like "*$_*" -and $EdgeRemovalOptions.Skip -notcontains $_.PackageFullName } | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-        }
-    }
-
-    # Function to remove Microsoft Edge processes, registry entries, and AppX packages
-    try {
-        Stop-EdgeProcesses
-        Remove-EdgeRegistryEntries
-        Remove-EdgeAppxPackages
-        Write-Output "Microsoft Edge components have been successfully removed."
-    } catch {
-        Write-Error "Failed to remove Microsoft Edge components: $_"
-    }
-}
-
-# Execute the main function
-Remove-MicrosoftEdge
-   
 } else {
     Write-Output "Microsoft Edge will not be uninstalled."
 }
@@ -1488,15 +1383,63 @@ else {
 Write-Output "Do you want to remove OneDrive?"
 $confirm = Read-Host
 if ($confirm -eq "y"){
-# kill the onedrive prcess
-taskkill /f /im OneDrive.exe
-
-# uninstall the onedrive
-# for x64 system (I tested it on my machine)
-%SystemRoot%\SysWOW64\OneDriveSetup.exe /uninstall
-
-# for x86 machines
-%SystemRoot%\System32\OneDriveSetup.exe /uninstall
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-ItemVerified.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
+    
+    function Remove-OneDrive() {
+        # Description: This script will remove and disable OneDrive integration.
+        Write-Host "Kill OneDrive process..."
+        taskkill.exe /F /IM "OneDrive.exe"
+        taskkill.exe /F /IM "explorer.exe"
+    
+        Write-Host "Remove OneDrive."
+        if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
+            & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
+        }
+        if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
+            & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
+        }
+    
+        Write-Host "Removing OneDrive leftovers..."
+        Remove-ItemVerified -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
+        Remove-ItemVerified -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
+        Remove-ItemVerified -Recurse -Force -ErrorAction SilentlyContinue "$env:systemdrive\OneDriveTemp"
+        # check if directory is empty before removing:
+        If ((Get-ChildItem "$env:userprofile\OneDrive" -Recurse | Measure-Object).Count -eq 0) {
+            Remove-ItemVerified -Recurse -Force -ErrorAction SilentlyContinue "$env:userprofile\OneDrive"
+        }
+    
+        Write-Host "Disable OneDrive via Group Policies."
+        Set-ItemPropertyVerified -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Type DWord -Value 1
+    
+        Write-Host "Remove Onedrive from explorer sidebar."
+        New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Scope Global -Name "HKCR"
+        mkdir -Force "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+        Set-ItemPropertyVerified -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Type DWord -Value 0
+        mkdir -Force "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+        Set-ItemPropertyVerified -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Type DWord -Value 0
+        Remove-PSDrive "HKCR"
+    
+        # Thank you Matthew Israelsson
+        Write-Host "Removing run hook for new users..."
+        reg load "hku\Default" "C:\Users\Default\NTUSER.DAT"
+        reg delete "HKEY_USERS\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "OneDriveSetup" /f
+        reg unload "hku\Default"
+    
+        Write-Host "Removing startmenu entry..."
+        Remove-ItemVerified -Path "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk" -Force -ErrorAction SilentlyContinue
+    
+        Write-Host "Removing scheduled task..."
+        Get-ScheduledTask -TaskPath '\' -TaskName 'OneDrive*' -ea SilentlyContinue | Unregister-ScheduledTask -Confirm:$false
+    
+        Write-Host "Restarting explorer..."
+        Start-Process "explorer.exe"
+    
+        Write-Host "Waiting for explorer to complete loading..."
+        Start-Sleep 5
+    }
+    
+    Remove-OneDrive
 }
 else{
     Write-Output "OneDrive will not be removed"
@@ -1611,38 +1554,6 @@ if ($confirm -eq "y") {
 }
 else {
     Write-Output "Cortana will not be disabled."
-}
-
-Write-Output "Do you want to disable UAC (User Account Control)? (yes/no)"
-$confirm = Read-Host
-if($confirm -eq "yes"){
-    # Thanks to ishu3101: https://gist.github.com/ishu3101/d76900d513383595bf5e7c8b8afe78c2
-    function Disable-UAC(){
-        $numVersion = (Get-CimInstance Win32_OperatingSystem).Version
-        $numSplit = $numVersion.split(".")[0]
-     
-        if ($numSplit -eq 10) {
-            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
-        }
-        elseIf ($numSplit -eq 6) {
-            $enumSplit = $numSplit.split(".")[1]
-            if ($enumSplit -eq 1 -or $enumSplit -eq 0) {
-                Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value "0"
-            } else {
-                Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
-            }
-        }
-        elseIf ($numSplit -eq 5) {
-            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value "0"
-        }
-        else {
-            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value "0"
-        }
-        Write-Host "Successfully Disabled UAC!"
-    }    
-}
-else{
-    Write-Output "UAC will not be disabled."
 }
 
 Write-Output "Do you want to set Windows Update frequency to security only? (y/n)"
