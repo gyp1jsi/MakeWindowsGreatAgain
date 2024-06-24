@@ -689,10 +689,10 @@ Write-Output "Do you want to optimize security? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y"){
     # Thanks to Win-Debloat-Tools: https://github.com/LeDragoX/Win-Debloat-Tools/blob/main/src/scripts/Optimize-Security.ps1
-Import-Module -DisableNameChecking "$PSScriptRoot\lib\Get-HardwareInfo.psm1"
-Import-Module -DisableNameChecking "$PSScriptRoot\lib\Title-Templates.psm1"
-Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
-Import-Module -DisableNameChecking "$PSScriptRoot\utils\Individual-Tweaks.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Get-HardwareInfo.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Title-Templates.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Set-ItemPropertyVerified.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\utils\Individual-Tweaks.psm1"
 
 # Adapted from: https://youtu.be/xz3oXHleKoM
 # Adapted from: https://github.com/ChrisTitusTech/win10script
@@ -860,7 +860,7 @@ $disabledServices | Out-File -FilePath $DisOutput
         
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\utils\"title-templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://github.com/ChrisTitusTech/win10script
@@ -1300,11 +1300,11 @@ if ($confirm -eq "y") {
 Write-Output "Do you want to uninstall Microsoft Edge?(y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
-    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Title-Templates.psm1"
-    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-ItemVerified.psm1"
-    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-UWPApp.psm1"
-    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
-    Import-Module -DisableNameChecking "$PSScriptRoot\lib\Show-MessageDialog.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Title-Templates.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Remove-ItemVerified.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Remove-UWPApp.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Set-ItemPropertyVerified.psm1"
+    Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Show-MessageDialog.psm1"
     
     function Remove-MSEdge() {
         $PathToLMEdgeUpdate = "HKLM:\SOFTWARE\Microsoft\EdgeUpdate"
@@ -1450,7 +1450,7 @@ $confirm = Read-Host
 if ($confirm -eq "y") {
     #Optimizes Task Scheduler tasks
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-scheduled-task-state.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\utils\"title-templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://github.com/ChrisTitusTech/win10script
