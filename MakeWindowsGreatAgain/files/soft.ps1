@@ -186,8 +186,8 @@ Write-Output "Do you want to optimize privacy settings? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output 'Windows will never again track you.'
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\utils\"individual-tweaks.psm1"
+    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Individual-Tweaks.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://youtu.be/hQSkPmZRCjc
@@ -542,7 +542,7 @@ if ($confirm -eq "y"){
 Import-Module -DisableNameChecking "$PSScriptRoot\lib\Get-HardwareInfo.psm1"
 Import-Module -DisableNameChecking "$PSScriptRoot\lib\Title-Templates.psm1"
 Import-Module -DisableNameChecking "$PSScriptRoot\lib\Set-ItemPropertyVerified.psm1"
-Import-Module -DisableNameChecking "$PSScriptRoot\utils\Individual-Tweaks.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\lib\Individual-Tweaks.psm1"
 
 # Adapted from: https://youtu.be/xz3oXHleKoM
 # Adapted from: https://github.com/ChrisTitusTech/win10script
@@ -692,9 +692,9 @@ if ($confirm -eq "y") {
 		}
 	}
 
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Get-HardwareInfo.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Set-Service-Startup.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://github.com/ChrisTitusTech/win10script
