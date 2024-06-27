@@ -1,5 +1,5 @@
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"manage-software.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"title-templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\"manage-software.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\"title-templates.psm1"
 
 function Install-Cortana() {
     $Apps = @("9NFFX4SZZ23L")
