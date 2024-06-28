@@ -1449,7 +1449,7 @@ Write-Output "Do you want to optimize Task Scheduler tasks? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     #Optimizes Task Scheduler tasks
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Set-Scheduled-TaskState.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Set-ScheduledTaskState.psm1"
 Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
