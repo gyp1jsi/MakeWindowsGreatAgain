@@ -182,6 +182,22 @@ Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Nam
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
 
+Write-Output "Do you want to install WinGet? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    <span class="hljs-variable">$progressPreference</span> = <span class="hljs-string">'silentlyContinue'</span>
+<span class="hljs-variable">$latestWingetMsixBundleUri</span> = $(Invoke-RestMethod https://api.github.com/repos/microsoft/winget-cli/releases/latest).assets.browser_download_url | Where-Object {<span class="hljs-variable">$_</span>.EndsWith(<span class="hljs-string">".msixbundle"</span>)}
+<span class="hljs-variable">$latestWingetMsixBundle</span> = <span class="hljs-variable">$latestWingetMsixBundleUri</span>.Split(<span class="hljs-string">"/"</span>)[-1]
+Write-Information <span class="hljs-string">"Downloading winget to artifacts directory..."</span>
+Invoke-WebRequest -Uri <span class="hljs-variable">$latestWingetMsixBundleUri</span> -OutFile <span class="hljs-string">"./<span class="hljs-variable">$latestWingetMsixBundle</span>"</span>
+Invoke-WebRequest -Uri https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx -OutFile Microsoft.VCLibs.x64.14.00.Desktop.appx
+Add-AppxPackage Microsoft.VCLibs.x64.14.00.Desktop.appx
+Add-AppxPackage <span class="hljs-variable">$latestWingetMsixBundle</span>
+}
+else {
+    Write-Output "WinGet will not be installed"
+}
+
 Write-Output "Do you want to optimize privacy settings? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {

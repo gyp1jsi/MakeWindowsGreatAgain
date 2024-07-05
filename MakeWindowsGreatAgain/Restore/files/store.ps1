@@ -1,3 +1,4 @@
+Write-Output "Downloading and installing Microsoft Store, it will take a while..."
 # Define the URL of the ZIP file
 $zipUrl = "https://github.com/kkkgo/LTSC-Add-MicrosoftStore/archive/refs/heads/master.zip"
 

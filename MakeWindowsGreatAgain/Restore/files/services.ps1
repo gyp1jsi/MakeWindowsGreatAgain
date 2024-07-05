@@ -1,3 +1,4 @@
+Write-Output "Enabling services..."
 # AUTOMATIC
 # Define the file path for the input list of service names
 $inputFilePath = "C:\MakeWindowsGreatAgain\backup\autoserv.txt"
