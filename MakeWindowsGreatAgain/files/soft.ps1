@@ -1,5 +1,5 @@
 # For those who don't rape Windows
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.07.03 (Soft)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.07.07 (Soft)'
 timeout /t 2
 # Pre-Installed Bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"

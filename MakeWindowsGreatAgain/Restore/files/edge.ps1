@@ -15,7 +15,7 @@ if (Test-Path $installerPath) {
     Write-Host "Download completed. Installing Microsoft Edge..."
     
     # Start the installation process
-    Start-Process -FilePath $installerPath -ArgumentList "/silent", "/install" -Wait
+    Start-Process -FilePath $installerPath -ArgumentList "/install"
     
     # Check if Edge was installed successfully
     $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"

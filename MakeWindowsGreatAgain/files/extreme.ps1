@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.07.03 (Extreme)'
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.07.07 (Extreme)'
 timeout /t 2
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
@@ -1380,7 +1380,7 @@ else {
     Write-Output "Teredo will not be disabled."
 }
 
-Write-Output "Do you want to remove OneDrive?"
+Write-Output "Do you want to remove OneDrive? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y"){
     Import-Module -DisableNameChecking "$PSScriptRoot\lib\Remove-ItemVerified.psm1"
@@ -1449,8 +1449,8 @@ Write-Output "Do you want to optimize Task Scheduler tasks? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     #Optimizes Task Scheduler tasks
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Set-ScheduledTaskState.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Set-ScheduledTaskState.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\include\lib\Title-Templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://github.com/ChrisTitusTech/win10script
