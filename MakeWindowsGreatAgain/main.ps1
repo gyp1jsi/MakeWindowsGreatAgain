@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.07.03 (Menu)"
+$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.07.07 (Menu)"
 
 Write-Output "DID YOU INSTALL EVERY UPDATE? (y/n)"
 $confirm = Read-Host

@@ -1,4 +1,4 @@
-$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.06.07 (Menu)"
+$host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.0.0 - 2024.07.07 (Menu)"
 # Define the folder where the scripts are located
 $folderPath = "$PSScriptRoot\files"
 # Define the files name
