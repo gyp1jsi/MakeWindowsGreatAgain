@@ -194,7 +194,7 @@ if ($confirm -eq "y"){
 Write-Output "Do you want to install WinGet? (y/n)"
 $confirm = Read-Host
 if($confirm -eq "y"){
-    <span class="hljs-variable">$progressPreference</span> = <span class="hljs-string">'silentlyContinue'</span>
+        <span class="hljs-variable">$progressPreference</span> = <span class="hljs-string">'silentlyContinue'</span>
 <span class="hljs-variable">$latestWingetMsixBundleUri</span> = $(Invoke-RestMethod https://api.github.com/repos/microsoft/winget-cli/releases/latest).assets.browser_download_url | Where-Object {<span class="hljs-variable">$_</span>.EndsWith(<span class="hljs-string">".msixbundle"</span>)}
 <span class="hljs-variable">$latestWingetMsixBundle</span> = <span class="hljs-variable">$latestWingetMsixBundleUri</span>.Split(<span class="hljs-string">"/"</span>)[-1]
 Write-Information <span class="hljs-string">"Downloading winget to artifacts directory..."</span>
