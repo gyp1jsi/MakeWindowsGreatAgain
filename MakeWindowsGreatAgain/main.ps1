@@ -45,11 +45,10 @@ do {
 |---------------------------------------------------------------------------------------------|
 | Personal notes:                                                                             |
 |                                                                                             |
-| To "Alessio il fai da te": Why do you keep defending yourself against evidence? What would  |
-| you do if you were standing right in front of me? NOTHING. So, before saying anything about |
-| me, LOOK AT YOURSELF. Yes, we do not know each other, still you keep threatening of doxxing |
-| other people that, still, you do not know.                                                  |
-| Why do I call you badly? Because that's who you are. In the eyes of any user, you are just  |
+| To "Alessio il fai da te": Why do you keep defending yourself against evidence? Before      |
+| saying anything about me, LOOK AT YOURSELF. Yes, we do not know each other, still you keep  |
+| threatening of doxxing other people that, still, you do not know.                           |
+| Why do I call you badly? Because that's who you are. You are just                           |
 | A RETARDED DOXXER.                                                                          |
 |                                                                                             |
 | To "zBloodwyn": YOUR BOOTLEG SCUMMY CTT SCRIPT BULLSHIT IS ABOUT TO END SOON!               | 
@@ -60,6 +59,10 @@ do {
 | distro? You must be more experienced than me, yet you seem clearly retarded and unable to   |
 | take critiques as improvement. By the way, your distro SUCKS ASS. Report me, I dare you.    |
 | #freecikappa                                                                                |
+|                                                                                             |
+| To Aurora: You should stop faking your entire personality on Telegram, we all know you are  |
+| NOT who you tell us. And, before calling our age checks illegal, maybe think twice before   |
+| selling other people's pictures on OnlyFans. I highly recommend you to touch grass, MORON.  |
 |_____________________________________________________________________________________________|
 
 1] Hard Mode (Recommended)
