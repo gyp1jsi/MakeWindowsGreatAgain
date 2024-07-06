@@ -1,6 +1,6 @@
 # For those who don't rape Windows
-$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 1.5.0 - 2024.04.14 (Soft)'
-
+$host.ui.RawUI.WindowTitle = 'MakeWindowsGreatAgain 2.0.0 - 2024.07.07 (Soft)'
+timeout /t 2
 # Pre-Installed Bloatware
 Write-Output "Do you want to uninstall preinstalled bloatware apps? (y/n)"
 $confirm = Read-Host
@@ -128,9 +128,7 @@ if ($confirm -eq "y") {
             # [DIY] Common Streaming services
     
             "*Netflix*"                        # Netflix
-            "*SpotifyMusic*"                   # Spotify
-            "*Spotify*"
-            "*SpotifyAB.SpotifyMusic*"         # dunno why I put 3 spotify packages but maybe one will work"
+            "*Spotify*"                        # Spotify
         )
         foreach ($App in $AppXApps) {
             Write-Verbose -Message ('Removing Package {0}' -f $App)
@@ -184,12 +182,21 @@ Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Nam
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\EdgeUpdate" -Name "UninstallCmdLine"
 Remove-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView" -Name "ModifyPath"
 
+Write-Output "Do you want to install WinGet? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    Start-Process powershell -ArgumentList '-NoExit', '-Command', 'irm asheroto.com/winget | iex'
+}
+else {
+    Write-Output "WinGet will not be installed"
+}
+
 Write-Output "Do you want to optimize privacy settings? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output 'Windows will never again track you.'
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\utils\"individual-tweaks.psm1"
+    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Individual-Tweaks.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://youtu.be/hQSkPmZRCjc
@@ -211,7 +218,7 @@ function Optimize-Privacy() {
     $TweakType = "Privacy"
 
     If ($Revert) {
-        Write-Status -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", $TweakType -Status "Reverting the tweaks is set to '$Revert'."
         $Zero = 1
         $One = 0
         $EnableStatus = @(
@@ -277,7 +284,7 @@ function Optimize-Privacy() {
         "SystemPaneSuggestionsEnabled"
     )
 
-    Write-Status -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager" -Warning
+    Write-Status -Types "?", $TweakType -Status "From Path: $PathToCUContentDeliveryManager"
     ForEach ($Name in $ContentDeliveryManagerDisableOnZero) {
         Write-Status -Types $EnableStatus[0].Symbol, $TweakType -Status "$($EnableStatus[0].Status) $($Name): $Zero"
         Set-ItemProperty -Path "$PathToCUContentDeliveryManager" -Name "$Name" -Type DWord -Value $Zero
@@ -533,7 +540,7 @@ ForEach ($Key in $KeysToDelete) {
         Write-Status -Types "-", $TweakType -Status "Removing Key: [$Key]"
         Remove-Item $Key -Recurse
     } Else {
-        Write-Status -Types "?", $TweakType -Status "The registry key $Key does not exist" -Warning
+        Write-Status -Types "?", $TweakType -Status "The registry key $Key does not exist"
     }
 }
 
@@ -541,9 +548,82 @@ Write-Output "Do you want to disable and stop useless services? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "The useless services will be removed."
-    Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"get-hardware-info.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"set-service-startup.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"title-templates.psm1"
+    function Stop-UnnecessaryServices
+	{
+		$servicesAuto = @"
+			"AudioSrv",
+			"AudioEndpointBuilder",
+			"BFE",
+			"BrokerInfrastructure",
+			"CDPSvc",
+			"CDPUserSvc_dc2a4",
+			"CoreMessagingRegistrar",
+			"CryptSvc",
+			"DPS",
+			"DcomLaunch",
+			"Dhcp",
+			"DispBrokerDesktopSvc",
+			"Dnscache",
+			"DoSvc",
+			"DusmSvc",
+			"EventLog",
+			"EventSystem",
+			"FontCache",
+			"LSM",
+			"LanmanServer",
+			"LanmanWorkstation",
+			"MapsBroker",
+			"MpsSvc",
+			"OneSyncSvc_dc2a4",
+			"Power",
+			"ProfSvc",
+			"RpcEptMapper",
+			"RpcSs",
+			"SCardSvr",
+			"SENS",
+			"SamSs",
+			"Schedule",
+			"SgrmBroker",
+			"ShellHWDetection",
+			"Spooler",
+			"SystemEventsBroker",
+			"TextInputManagementService",
+			"Themes",
+			"TrkWks",
+			"UserManager",
+			"VGAuthService",
+			"VMTools",
+			"WSearch",
+			"Wcmsvc",
+			"WinDefend",
+			"Winmgmt",
+			"WlanSvc",
+			"WpnService",
+			"WpnUserService_dc2a4",
+			"cbdhsvc_dc2a4",
+			"gpsvc",
+			"iphlpsvc",
+			"mpssvc",
+			"nsi",
+			"sppsvc",
+			"tiledatamodelsvc",
+			"vm3dservice",
+			"webthreatdefusersvc_dc2a4",
+			"wscsvc"
+"@		
+	
+		$allServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $servicesAuto -NotContains $_.Name}
+		foreach($service in $allServices)
+		{
+			Stop-Service -Name $service.Name -PassThru
+			Set-Service $service.Name -StartupType Manual
+			"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
+		}
+	}
+
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Get-HardwareInfo.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Set-Service-Startup.psm1"
+Import-Module -DisableNameChecking $PSScriptRoot\include\lib\"Title-Templates.psm1"
 
 # Adapted from: https://youtu.be/qWESrvP_uU8
 # Adapted from: https://github.com/ChrisTitusTech/win10script
@@ -588,7 +668,6 @@ function Optimize-ServicesRunning() {
         "DiagTrack"
         "DialogBlockingService"
         "esifsvc"
-        "ETDService"                                # In case of problems, enable again.
         "HfcDisableService"
         "HPAppHelperCap"
         "HPDiagsCap"
@@ -611,57 +690,10 @@ function Optimize-ServicesRunning() {
         "RstMwService"
         "RtkAudioUniversalService"
         "shpamsvc"
-        "Surfshark Service"
         "tzautoupdate"
         "UevAgentService"
         "WSearch"
         "XTU3SERVICE"
-        "Micro Star SCM"
-        "MSI_Center_Service"
-        "MSI Foundation Service"
-        "MSI_VoiceControl_Service"
-        "Mystic_Light_Service"
-        "NahimicService"
-        "NortonSecurity"
-        "nsWscSvc"
-        "FvSvc"
-        "RtkAudioUniversalService"
-        "LightKeeperService"
-        "AASSvc"
-        "AcerLightningService"
-        "DtsApo4Service"
-        "Killer Analytics Service"
-        "KNDBWM"
-        "KAPSService"
-        "McAWFwk"
-        "McAPExe"
-        "mccspsvc"
-        "mfefire"
-        "ModuleCoreService"
-        "PEFService"
-        "mfemms"
-        "mfevtp"
-        "McpManagementService"
-        "TbtP2pShortcutService"
-        "AMD Crash Defender Service"
-        "AMD External Events Utility"
-        "ArmouryCrateControlInterface"
-        # "ArmouryCrateService"
-        "AsusAppService"
-        "LightingService"
-        "ASUSLinkNear"
-        "ASUSLinkRemote"
-        "ASUSOptimization"
-        "ASUSSoftwareManager"
-        "ASUSSwitch"
-        "ASUSSystemAnalysis"
-        "ASUSSystemDiagnosis"
-        "asus"
-        "asusm"
-        "AsusCertService"
-        "FMAPOService"
-        "mc-wps-secdashboardservice"
-        "Aura Wallpaper Service"
         # - Services which cannot be disabled (and shouldn't)
         #"wscsvc"                                   # DEFAULT: Automatic | Windows Security Center Service
         #"WdNisSvc"                                 # DEFAULT: Manual    | Windows Defender Network Inspection Service
@@ -675,7 +707,6 @@ function Optimize-ServicesRunning() {
         "FontCache"                      # DEFAULT: Automatic | Windows Font Cache
         "iphlpsvc"                       # DEFAULT: Automatic | IP Helper Service (IPv6 (6to4, ISATAP, Port Proxy and Teredo) and IP-HTTPS)
         "lmhosts"                        # DEFAULT: Manual    | TCP/IP NetBIOS Helper
-        "ndu"                            # DEFAULT: Automatic | Windows Network Data Usage Monitoring Driver (Shows network usage per-process on Task Manager)
         "wuauserv"                       # DEFAULT: Automatic | Windows Update
         "UsoSvc"                         # DEFAULT: Automatic | Update Orchestrator Service (Manages the download and installation of Windows updates)
         #"NetTcpPortSharing"             # DEFAULT: Disabled  | Net.Tcp Port Sharing Service
@@ -743,7 +774,7 @@ function Optimize-ServicesRunning() {
 
     Set-ServiceStartup -Manual -Services $ServicesToManual
     If ($Revert) {
-        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'." -Warning
+        Write-Status -Types "*", "Service" -Status "Reverting the tweaks is set to '$Revert'."
         $CustomMessage = { "Resetting $Service ($((Get-Service $Service).DisplayName)) as 'Manual' on Startup ..." }
         Set-ServiceStartup -Manual -Services $ServicesToDisabled -Filter $EnableServicesOnSSD $EnableServicesOnWindows11 -CustomMessage $CustomMessage
     } Else {
@@ -804,3 +835,15 @@ if ($confirm -eq "y") {
 else {
     Write-Output "Cortana will not be disabled."
 }
+
+Write-Output "Do you want to set Windows Update frequency to security only? (y/n)"
+$confirm = Read-Host
+if($confirm -eq "y"){
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "BranchReadinessLevel" /t REG_DWORD /d "20" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferFeatureUpdatesPeriodInDays" /t REG_DWORD /d "365" /f
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferQualityUpdatesPeriodInDays " /t REG_DWORD /d "4" /f
+}
+else {
+    Write-Output "Windows updates will not be set to security only."
+}
+timeout /t 2

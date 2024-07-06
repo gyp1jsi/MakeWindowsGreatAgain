@@ -1,9 +1,9 @@
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"manage-software.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"new-shortcut.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"remove-uwp-appx.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"set-service-startup.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"set-windows-feature-state.psm1"
-Import-Module -DisableNameChecking $PSScriptRoot\..\lib\"title-templates.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\manage-software.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\new-shortcut.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\remove-uwp-appx.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\set-service-startup.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\set-windows-feature-state.psm1"
+Import-Module -DisableNameChecking "$PSScriptRoot\title-templates.psm1"
 
 $DesktopPath = [Environment]::GetFolderPath("Desktop");
 $PathToLMPoliciesActivityHistory = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
