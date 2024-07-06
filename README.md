@@ -7,7 +7,7 @@ This script aims to **optimize** Windows 10 and 11 by removing unuseful features
 2. Clean-Installed drivers (for NVIDIA use [NVCleanInstall](https://www.techpowerup.com/download/techpowerup-nvcleanstall/), for AMD use [RadeonSoftwareSlimmer](https://github.com/GSDragoon/RadeonSoftwareSlimmer); disable and remove components as you prefer)
 
 ## You can download from the [Releases](https://github.com/gyp1jsi/MakeWindowsGreatAgain/releases) page.
-Extract the script and run "RUN ME AS ADMIN.bat", as administrator obviously.
+Extract the script and run "RUNME!.bat", as administrator obviously.
 
 ### Extreme mode notes:
 This mode disables core Windows functionalities. I will not give any active help. Though, I am leaving some information regarding services that handle specific functions.
