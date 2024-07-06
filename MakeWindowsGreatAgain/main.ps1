@@ -47,9 +47,8 @@ do {
 |                                                                                             |
 | To "Alessio il fai da te": Why do you keep defending yourself against evidence? Before      |
 | saying anything about me, LOOK AT YOURSELF. Yes, we do not know each other, still you keep  |
-| threatening of doxxing other people that, still, you do not know.                           |
-| Why do I call you badly? Because that's who you are. You are just                           |
-| A RETARDED DOXXER.                                                                          |
+| threatening of doxxing other people that, still, you do not know. Why do I call you badly?  |
+| Because that's who you are. You are just A RETARDED DOXXER.                                 |
 |                                                                                             |
 | To "zBloodwyn": YOUR BOOTLEG SCUMMY CTT SCRIPT BULLSHIT IS ABOUT TO END SOON!               | 
 | You are still in time to end your circus and get an honest job, instead of scamming people. |
