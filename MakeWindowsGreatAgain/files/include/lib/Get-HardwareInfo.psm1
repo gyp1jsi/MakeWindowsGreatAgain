@@ -1,4 +1,3 @@
-# Importazione del modulo con il controllo dei nomi disabilitato
 Import-Module -DisableNameChecking "$PSScriptRoot\Title-Templates.psm1"
 
 function Get-CPU {
@@ -124,7 +123,6 @@ function Get-SystemSpec {
     try {
         Write-Status -Types "@" -Status "Loading system specs..."
 
-        # Recupera informazioni sul sistema operativo
         $WinVer = (Get-CimInstance -Class Win32_OperatingSystem).Caption -replace 'Microsoft ', ''
         $DisplayVersion = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
         $OldBuildNumber = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ReleaseId
