@@ -1,119 +1,146 @@
 Import-Module -DisableNameChecking "$PSScriptRoot\Title-Templates.psm1"
 
-function Get-CPU() {
+function Get-CPU {
     [CmdletBinding()]
     [OutputType([String])]
     param (
-        [Switch] $NameOnly,
-        [Parameter(Mandatory = $false)]
-        [String] $Separator = '|'
+        [Switch]$NameOnly,
+        [String]$Separator = '|'
     )
 
-    $CPUName = ""
+    try {
+        $CPUInfo = Get-CimInstance -ClassName Win32_Processor
+        $CPUName = $CPUInfo.Name.Trim()
+        $CPUCoresAndThreads = "$($CPUInfo.NumberOfCores)C/$($env:NUMBER_OF_PROCESSORS)T"
 
-    ForEach ($Item in (Get-ItemProperty "HKLM:\HARDWARE\DESCRIPTION\System\CentralProcessor\0").ProcessorNameString.Trim(" ").Split(" ")) {
-        If (($Item -ne " ") -or ($null -ne $Item)) {
-            $CPUName = $CPUName.Trim(" ") + " " + $Item.Trim(" ")
+        if ($NameOnly) {
+            return $CPUName
         }
+
+        return "$Env:PROCESSOR_ARCHITECTURE $Separator $CPUName $CPUCoresAndThreads"
+    } catch {
+        Write-Warning "Unable to retrieve CPU information."
     }
-
-    If ($NameOnly) {
-        return "$CPUName"
-    }
-
-    $CPUCoresAndThreads = "($((Get-CimInstance -class Win32_processor).NumberOfCores)C/$env:NUMBER_OF_PROCESSORS`T)"
-
-    return "$Env:PROCESSOR_ARCHITECTURE $Separator $CPUName $CPUCoresAndThreads"
 }
 
-function Get-GPU() {
+function Get-GPU {
     [CmdletBinding()]
     [OutputType([String])]
+    param ()
 
-    $GPU = (Get-CimInstance -Class Win32_VideoController).Name
-    Write-Verbose "Video Info: $GPU"
-
-    return "$GPU"
+    try {
+        $GPU = (Get-CimInstance -Class Win32_VideoController).Name
+        Write-Verbose "Video Info: $GPU"
+        return $GPU
+    } catch {
+        Write-Warning "Unable to retrieve GPU information."
+    }
 }
 
-function Get-RAM() {
+function Get-RAM {
     [CmdletBinding()]
     [OutputType([String])]
+    param ()
 
-    $RamInGB = (Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum / 1GB
-    $RAMSpeed = (Get-CimInstance -ClassName Win32_PhysicalMemory).Speed[0]
-
-    return "$RamInGB`GB ($RAMSpeed`MHz)"
+    try {
+        $RamInGB = (Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum / 1GB
+        $RAMSpeed = (Get-CimInstance -ClassName Win32_PhysicalMemory)[0].Speed
+        return "$RamInGB`GB ($RAMSpeed`MHz)"
+    } catch {
+        Write-Warning "Unable to retrieve RAM information."
+    }
 }
 
-function Get-OSArchitecture() {
+function Get-OSArchitecture {
     [CmdletBinding()]
     param (
-        $Architecture = (Get-ComputerInfo -Property OSArchitecture)
+        [String]$Architecture = (Get-ComputerInfo -Property OSArchitecture)
     )
 
-    If ($Architecture -like "*64*bit*") {
-        $Architecture = @("x64")
-    } ElseIf ($Architecture -like "*32*bit*") {
-        $Architecture = @("x86")
-    } ElseIf (($Architecture -like "*ARM") -and ($Architecture -like "*64")) {
-        $Architecture = @("arm64")
-    } ElseIf ($Architecture -like "*ARM") {
-        $Architecture = @("arm")
-    } Else {
-        Write-Host "[?] Couldn't identify the System Architecture '$Architecture'. :/" -ForegroundColor Yellow -BackgroundColor Black
-        $Architecture = $null
-    }
+    try {
+        if ($Architecture -like "*64*bit*") {
+            $Architecture = "x64"
+        } elseif ($Architecture -like "*32*bit*") {
+            $Architecture = "x86"
+        } elseif ($Architecture -like "*ARM*64") {
+            $Architecture = "arm64"
+        } elseif ($Architecture -like "*ARM*") {
+            $Architecture = "arm"
+        } else {
+            Write-Host "[?] Couldn't identify the System Architecture '$Architecture'. :/" -ForegroundColor Yellow
+            $Architecture = $null
+        }
 
-    Write-Warning "$Architecture OS detected!"
-    return $Architecture
+        Write-Warning "$Architecture OS detected!"
+        return $Architecture
+    } catch {
+        Write-Warning "Unable to retrieve OS architecture."
+    }
 }
 
-function Get-OSDriveType() {
+function Get-OSDriveType {
     [CmdletBinding()]
     [OutputType([String])]
+    param ()
 
-    # Adapted from: https://stackoverflow.com/a/62087930
-    $SystemDriveType = Get-PhysicalDisk | ForEach-Object {
-        $PhysicalDisk = $_
-        $PhysicalDisk | Get-Disk | Get-Partition |
-        Where-Object DriveLetter -EQ "$($env:SystemDrive[0])" | Select-Object DriveLetter, @{ n = 'MediaType'; e = { $PhysicalDisk.MediaType } }
+    try {
+        $SystemDriveType = Get-PhysicalDisk | Where-Object {
+            $Disk = $_
+            $Disk | Get-Disk | Get-Partition | Where-Object DriveLetter -EQ "$($env:SystemDrive[0])"
+        } | Select-Object -ExpandProperty MediaType
+
+        return $SystemDriveType
+    } catch {
+        Write-Warning "Unable to retrieve OS drive type."
     }
-
-    $OSDriveType = $SystemDriveType.MediaType
-    return "$OSDriveType"
 }
 
-function Get-DriveSpace() {
+function Get-DriveSpace {
     [CmdletBinding()]
     [OutputType([String])]
     param (
-        [Parameter(Mandatory = $false)]
-        [String] $DriveLetter = $env:SystemDrive[0]
+        [String]$DriveLetter = $env:SystemDrive[0]
     )
 
-    $SystemDrive = (Get-PSDrive -Name $DriveLetter)
-    $AvailableStorage = $SystemDrive.Free / 1GB
-    $UsedStorage = $SystemDrive.Used / 1GB
-    $TotalStorage = $AvailableStorage + $UsedStorage
-
-    return "$DriveLetter`: $($AvailableStorage.ToString("#.#"))/$($TotalStorage.ToString("#.#")) GB ($((($AvailableStorage / $TotalStorage) * 100).ToString("#.#"))%)"
+    try {
+        $SystemDrive = Get-PSDrive -Name $DriveLetter
+        $AvailableStorage = $SystemDrive.Free / 1GB
+        $UsedStorage = $SystemDrive.Used / 1GB
+        $TotalStorage = $AvailableStorage + $UsedStorage
+        return "$DriveLetter`: $([math]::Round($AvailableStorage, 1))/$([math]::Round($TotalStorage, 1)) GB ($([math]::Round(($AvailableStorage / $TotalStorage) * 100, 1))%)"
+    } catch {
+        Write-Warning "Unable to retrieve drive space information."
+    }
 }
 
-function Get-SystemSpec() {
+function Get-SystemSpec {
     [CmdletBinding()]
     [OutputType([System.Object[]])]
     param (
-        [Parameter(Mandatory = $false)]
-        [String] $Separator = '|'
+        [String]$Separator = '|'
     )
 
-    Write-Status -Types "@" -Status "Loading system specs..."
-    # Adapted From: https://www.delftstack.com/howto/powershell/find-windows-version-in-powershell/#using-the-wmi-class-with-get-wmiobject-cmdlet-in-powershell-to-get-the-windows-version
-    $WinVer = (Get-CimInstance -class Win32_OperatingSystem).Caption -replace 'Microsoft ', ''
-    $DisplayVersion = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
-    $OldBuildNumber = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ReleaseId
-    $DisplayedVersionResult = '(' + @{ $true = $DisplayVersion; $false = $OldBuildNumber }[$null -ne $DisplayVersion] + ')'
+    try {
+        Write-Status -Types "@" -Status "Loading system specs..."
 
-    return $(Get-OSDriveType), $Separator, $WinVer, $DisplayedVersionResult, $Separator, $(Get-RAM), $Separator, $(Get-CPU -Separator $Separator), $Separator, $(Get-GPU)
+        $WinVer = (Get-CimInstance -Class Win32_OperatingSystem).Caption -replace 'Microsoft ', ''
+        $DisplayVersion = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
+        $OldBuildNumber = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ReleaseId
+        $VersionDisplay = if ($DisplayVersion) { $DisplayVersion } else { $OldBuildNumber }
+
+        return @( 
+            Get-OSDriveType, 
+            $Separator, 
+            $WinVer, 
+            "($VersionDisplay)", 
+            $Separator, 
+            Get-RAM, 
+            $Separator, 
+            Get-CPU -Separator $Separator, 
+            $Separator, 
+            Get-GPU
+        )
+    } catch {
+        Write-Warning "Unable to retrieve system specifications."
+    }
 }

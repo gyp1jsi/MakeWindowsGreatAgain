@@ -4,25 +4,19 @@ Write-Output "DID YOU INSTALL EVERY UPDATE? (y/n)"
 $confirm = Read-Host
 if ($confirm -eq "y") {
     Write-Output "DID YOU INSTALL ALL NEWEST DRIVERS? (y/n)"
-$confirm = Read-Host
-if ($confirm -eq "y") {
-    Write-Output "DID YOU INSTALL BASIC PROGRAMS (e.g. Google Chrome)? (y/n)"
-$confirm = Read-Host
-if ($confirm -eq "y") {
-    # Ottenere il percorso assoluto della directory in cui si trova lo script
-$scriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+    $confirm = Read-Host
+    if ($confirm -eq "y") {
+        Write-Output "DID YOU INSTALL BASIC PROGRAMS (e.g. Google Chrome)? (y/n)"
+        $confirm = Read-Host
+        if ($confirm -eq "y") {
+            $scriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+            $folderPath = Join-Path $scriptPath "files"
+            $hardFile = "hard.ps1"
+            $softFile = "soft.ps1"
+            $extremeFile = "extreme.ps1"
 
-# Definire il percorso della cartella che contiene i file, utilizzando il percorso assoluto della directory in cui si trova lo script
-$folderPath = Join-Path $scriptPath "files"
-
-# Definire i nomi dei file da avviare
-$hardFile = "hard.ps1"
-$softFile = "soft.ps1"
-$extremeFile = "extreme.ps1"
-
-# Avviare il file corrispondente al tasto premuto
-do {
-    Write-Host @"                                                                                     
+            do {
+                Write-Host @"
         _____     _____      _____      _____    ____         ____          ______   ____ 
     ___|\    \   |\    \    /    /| ___|\    \  |    |       |    |     ___|\     \ |    |
     /    /\    \  | \    \  /    / ||    |\    \ |    |       |    |    |    |\     \|    |
@@ -71,29 +65,24 @@ do {
 Q -Quit
     
 "@
-    $key = [System.Console]::ReadKey($true)
-    switch ($key.KeyChar) {
-        1 { & "$folderPath\$hardFile" }
-        2 { & "$folderPath\$softFile" }
-        3 { & "$folderPath\$extremeFile" }
-        q { break }
-        default { Write-Host "Invalid option." }
+                $key = [System.Console]::ReadKey($true)
+                switch ($key.KeyChar) {
+                    1 { & "$folderPath\$hardFile" }
+                    2 { & "$folderPath\$softFile" }
+                    3 { & "$folderPath\$extremeFile" }
+                    q { break }
+                    default { Write-Host "Invalid option." }
+                }
+            } until ($key.KeyChar -eq "q")
+        } else {
+            Write-Output "Run again the script when you'll have done everything."
+            timeout /t 7
+        }
+    } else {
+        Write-Output "Run again the script when you'll have done everything."
+        timeout /t 7
     }
-} until ($key.KeyChar -eq "q")
-    
-}
-else {
-    Write-Output "Run again the script when you'll have done everything."
-    timeout /t 7
-}
-    
-}
-else {
-    Write-Output "Run again the script when you'll have done everything."
-    timeout /t 7
-}
-}
-else {
+} else {
     Write-Output "Run again the script when you'll have done everything."
     timeout /t 7
 }
