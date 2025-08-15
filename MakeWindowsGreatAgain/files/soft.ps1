@@ -784,7 +784,10 @@ function Optimize-ServicesRunning() {
         Set-ServiceStartup -Automatic -Services $EnableServicesOnSSD -CustomMessage $CustomMessage
     }
 
-    Set-ServiceStartup -Manual -Services $ServicesToManual
+    If ($EnableServicesOnWindows11 -or $Revert) {
+        $CustomMessage = { "The $Service ($((Get-Service $Service).DisplayName)) service works better in 'Automatic' mode on Windows 11 ..." }
+        Set-ServiceStartup -Automatic -Services $EnableServicesOnWindows11 -CustomMessage $CustomMessage
+    }
 }
 
 function Main() {
