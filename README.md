@@ -9,7 +9,7 @@
 2. Clean-Installed drivers (NVIDIA: [NVSlimmer](https://www.majorgeeks.com/mg/getmirror/nvslimmer,2.html), AMD: [RadeonSoftwareSlimmer](https://github.com/GSDragoon/RadeonSoftwareSlimmer))
 
 # How to run?
-Open **PowerShell**, then copy and paste the command below.
+Open **PowerShell** as **administrator**, then copy and paste the command below.
 ```
 irm "https://raw.githubusercontent.com/gyp1jsi/MakeWindowsGreatAgain/refs/heads/untested/MakeWindowsGreatAgain/mwga.ps1" | iex
 ```

@@ -1,12 +1,6 @@
 # MakeWindowsGreatAgain
 # This script is designed to enhance the Windows experience by removing unwanted apps, disabling telemetry and services, and applying various tweaks.
 
-If (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Administrator privileges required. Restarting the script as administator." -ForegroundColor Yellow
-    Start-Process powershell -Verb RunAs -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "' + $PSCommandPath + '"')
-    Exit
-}
-
 mode con: cols=82 lines=28
 
 # Menu
