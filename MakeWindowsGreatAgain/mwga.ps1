@@ -70,7 +70,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Bing-related apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -97,7 +97,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Xbox-related apps uninstalled."
-        timeout.exe /t 2
+        
         Uninstall-Apps
     }
 
@@ -114,7 +114,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Cortana apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -131,7 +131,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "OneDrive apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -148,7 +148,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Feedback Hub apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -169,7 +169,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Office-related apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -187,7 +187,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Your Phone apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -205,7 +205,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Microsoft Teams apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -224,7 +224,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Mixed Reality apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -293,7 +293,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Third-party apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -301,7 +301,7 @@ function Uninstall-Apps {
         Write-Output "Uninstalling Windows Store..."
         Get-AppxPackage -allusers WindowsStore | Remove-AppxPackage
         Write-Output "Windows Store uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -309,7 +309,7 @@ function Uninstall-Apps {
         Write-Output "Uninstalling Microsoft Edge..."
         Get-AppxPackage -allusers Microsoft.MicrosoftEdge | Remove-AppxPackage
         Write-Output "Microsoft Edge uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
 
@@ -318,7 +318,7 @@ function Uninstall-Apps {
         Write-Output "Uninstalling all apps..."
         Get-AppxPackage | Remove-AppxPackage -ErrorAction SilentlyContinue
         Write-Output "All apps uninstalled."
-        timeout.exe /t 2
+         
         Uninstall-Apps
     }
     Clear-Host
@@ -446,7 +446,7 @@ function Optimize-Privacy {
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Type DWord -Value 1
         
         Write-Output "Telemetry and data collection registry keys have been disabled."
-        timeout.exe /t 2
+         
         Optimize-Privacy
 
 
@@ -468,7 +468,7 @@ function Optimize-Privacy {
             Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
         }
         Write-Output "Telemetry and data collection services have been disabled."
-        timeout.exe /t 2
+         
         Optimize-Privacy
 
     }
@@ -495,7 +495,7 @@ function Optimize-Privacy {
             Disable-ScheduledTask -TaskPath "\" + ($task -replace "\\[^\\]+$", "\") -TaskName ($task -split "\\")[-1] -ErrorAction SilentlyContinue
         }
                 Write-Output "Telemetry scheduled tasks have been disabled."
-                timeout.exe /t 2
+                 
                 Optimize-Privacy
 
     }
@@ -836,7 +836,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "ASUS Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -854,7 +854,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "Dell Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -884,7 +884,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "HP Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -902,7 +902,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "Lenovo Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -926,7 +926,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "MSI Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -944,7 +944,7 @@ function Optimize-Services {
                 Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
             }
             Write-Output "Samsung Services have been disabled."
-            timeout.exe /t 2
+             
             Optimize-Services
         }
 
@@ -1016,7 +1016,7 @@ function Other-Tweaks {
         Write-Output "Disabling Teredo..."
         Set-NetTeredoConfiguration -Type Disabled
         Write-Output "Teredo has been disabled."
-        timeout.exe /t 2
+         
         Other-Tweaks
     }
 
@@ -1026,7 +1026,7 @@ function Other-Tweaks {
             reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "BranchReadinessLevel" /t REG_DWORD /d "20" /f
             reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferFeatureUpdatesPeriodInDays" /t REG_DWORD /d "365" /f
             reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "DeferQualityUpdatesPeriodInDays " /t REG_DWORD /d "4" /f
-            timeout.exe /t 2
+             
             Other-Tweaks
     }
 
@@ -1046,7 +1046,7 @@ function Other-Tweaks {
         schtasks /change /disable /tn "NVIDIA GeForce Experience SelfUpdate_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
         schtasks /change /disable /tn "NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
         Write-Output "NVIDIA Telemetry has been disabled."
-        timeout.exe /t 2
+         
         Other-Tweaks
     }
     function Disable-Hibernation {
@@ -1054,7 +1054,7 @@ function Other-Tweaks {
         Write-Output "Disabling Hibernation..."
         powercfg.exe /hibernate off
         Write-Output "Hibernation has been disabled."
-        timeout.exe /t 2
+         
         Other-Tweaks
     }
 
@@ -1063,7 +1063,7 @@ function Other-Tweaks {
         Write-Output "Disabling Windows Update Delivery Optimization..."
         reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /v "DODownloadMode" /t REG_DWORD /d "0" /f
         Write-Output "Windows Update Delivery Optimization has been disabled."
-        timeout.exe /t 2
+         
         Other-Tweaks
     }
 
@@ -1203,7 +1203,7 @@ function Other-Tweaks {
         Write-Output "Setting IRP Stack Size"
         reg add "HKLM\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters" /v "IRPStackSize" /t REG_DWORD /d "20" /f
         timeout /t 1 /nobreak > NUL
-        timeout.exe /t 2
+         
         Other-Tweaks
     }
 
