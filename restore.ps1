@@ -47,7 +47,6 @@ function Install-Edge {
     Write-Output "Installing Microsoft Edge..."
     winget install --id Microsoft.Edge -e --source winget
     Write-Output "Microsoft Edge installed."
-    timeout /t 3
     Show-Menu
 }
 
@@ -108,7 +107,7 @@ foreach ($serviceName in $serviceNames) {
     }
 }
     Write-Output "Essential Windows services restored."
-    timeout /t 3
+
     Show-Menu
 }
 
