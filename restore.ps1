@@ -1,5 +1,6 @@
 $host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.1.0 - 2025.09.01 (Restore Tool)"
 
+mode con: cols=82 lines=28
 # Menu
 function Show-Menu {
     $host.ui.RawUI.WindowTitle = "MakeWindowsGreatAgain 2.1.0 - 2025.09.01 (Menu)"
@@ -110,3 +111,5 @@ foreach ($serviceName in $serviceNames) {
     timeout /t 3
     Show-Menu
 }
+
+Show-Menu
