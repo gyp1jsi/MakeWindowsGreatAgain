@@ -307,8 +307,10 @@ function Uninstall-Apps {
 
     function MicrosoftEdge {
         Write-Output "Uninstalling Microsoft Edge..."
-        Get-AppxPackage -allusers Microsoft.MicrosoftEdge | Remove-AppxPackage
+        Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application\*\Installer\"
+        setup.exe --uninstall --system-level --force-uninstall --verbose-logging
         Write-Output "Microsoft Edge uninstalled."
+        timeout /t 5222
          
         Uninstall-Apps
     }
