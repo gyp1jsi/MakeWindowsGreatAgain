@@ -312,12 +312,12 @@ function Uninstall-Apps {
         $PathToLMUninstallMSEdgeWebView = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView"
     
         Write-Status -Types "+" -Status "Enabling uninstall button to Microsoft Edge..."
-        Set-ItemPropertyVerified -Path "$PathToLMUninstallMSEdge", "$PathToLMUninstallMSEdgeUpdate", "$PathToLMUninstallMSEdgeWebView" -Name "NoRemove" -Type DWord -Value 0
+        Set-ItemProperty -Path "$PathToLMUninstallMSEdge", "$PathToLMUninstallMSEdgeUpdate", "$PathToLMUninstallMSEdgeWebView" -Name "NoRemove" -Type DWord -Value 0
     
         Write-Status -Types "@" -Status "Stopping all 'msedge' processes before uninstalling..."
         Get-Process -Name msedge | Stop-Process -PassThru -Force
     
-        If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge\Application") {
+        If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge\Application") {G
             ForEach ($FullName in (Get-ChildItem -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge*\Application\*\Installer\setup.exe").FullName) {
                 Write-Status -Types "@" -Status "Uninstalling MS Edge from $FullName..."
                 Start-Process -FilePath $FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait
@@ -335,22 +335,35 @@ function Uninstall-Apps {
             Write-Status -Types "?" -Status "EdgeCore folder does not exist anymore..." -Warning
         }
     
-        Remove-UWPApp -AppxPackages @("Microsoft.MicrosoftEdge", "Microsoft.MicrosoftEdge.Stable", "Microsoft.MicrosoftEdge.*", "Microsoft.MicrosoftEdgeDevToolsClient")
+        $EdgeApps = @(
+            "Microsoft.MicrosoftEdge",
+            "Microsoft.MicrosoftEdge.Stable",
+            "Microsoft.MicrosoftEdgeDevToolsClient"
+        )
+        foreach ($App in $EdgeApps) {
+            Write-Verbose -Message ('Removing Package {0}' -f $App)
+            Get-AppxPackage -Name $App | Remove-AppxPackage -ErrorAction SilentlyContinue
+            Get-AppxPackage -Name $App -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+            Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+        }
+        foreach ($pkg in $edgePackages) {
+            Get-AppxPackage -AllUsers -Name $pkg | Remove-AppxPackage -ErrorAction SilentlyContinue
+        }
         Set-ScheduledTaskState -State Disabled -ScheduledTasks @("\MicrosoftEdgeUpdateTaskMachineCore", "\MicrosoftEdgeUpdateTaskMachineUA", "\MicrosoftEdgeUpdateTaskUser*")
         Set-ServiceStartup -State 'Disabled' -Services @("edgeupdate", "edgeupdatem", "MicrosoftEdgeElevationService")
     
         Write-Status -Types "@" -Status "Preventing Edge from reinstalling..."
-        Set-ItemPropertyVerified -Path "$PathToLMEdgeUpdate" -Name "DoNotUpdateToEdgeWithChromium" -Type DWord -Value 1
+        Set-ItemProperty -Path "$PathToLMEdgeUpdate" -Name "DoNotUpdateToEdgeWithChromium" -Type DWord -Value 1
     
         Write-Status -Types "@" -Status "Deleting Edge appdata\local folders from current user..."
-        Remove-ItemVerified -Path "$env:LOCALAPPDATA\Packages\Microsoft.MicrosoftEdge*_*" -Recurse -Force | Out-Host
+        Remove-Item -Path "$env:LOCALAPPDATA\Packages\Microsoft.MicrosoftEdge*_*" -Recurse -Force | Out-Host
     
         Write-Status -Types "@" -Status "Deleting Edge from $env:SystemDrive\Program Files (x86)\Microsoft\..."
-        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge" -Recurse -Force | Out-Host
-        # Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore" -Recurse -Force | Out-Host
-        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force | Out-Host
-        # Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeWebView" -Recurse -Force | Out-Host
-        Remove-ItemVerified -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Temp" -Recurse -Force | Out-Host
+        Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge" -Recurse -Force | Out-Host
+        # Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore" -Recurse -Force | Out-Host
+        Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force | Out-Host
+        # Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeWebView" -Recurse -Force | Out-Host
+        Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Temp" -Recurse -Force | Out-Host
     
         timeout /t 5222
         Write-Output "Microsoft Edge uninstalled."
