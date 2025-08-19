@@ -307,9 +307,16 @@ function Uninstall-Apps {
 
     function MicrosoftEdge {
         Write-Output "Uninstalling Microsoft Edge..."
-        Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application\*\Installer\"
-        setup.exe --uninstall --system-level --force-uninstall --verbose-logging
-        Write-Output "Microsoft Edge uninstalled."
+        $installerPath = Get-ChildItem "C:\Program Files (x86)\Microsoft\Edge\Application\" -Directory | ForEach-Object {
+            Join-Path $_.FullName "Installer"
+        } | Where-Object { Test-Path $_ }
+        if ($installerPath) {
+            Set-Location $installerPath
+            .\setup.exe --uninstall --system-level --force-uninstall --verbose-logging
+            Write-Output "Microsoft Edge uninstalled."
+        } else {
+            Write-Output "Microsoft Edge installer not found."
+        }
         timeout /t 5222
          
         Uninstall-Apps
