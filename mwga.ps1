@@ -365,7 +365,7 @@ function Uninstall-Apps {
         # Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeWebView" -Recurse -Force | Out-Host
         Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Temp" -Recurse -Force | Out-Host
     
-        timeout /t 5222
+
         Write-Output "Microsoft Edge uninstalled."
         Uninstall-Apps
     }

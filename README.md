@@ -9,9 +9,14 @@
 2. Clean-Installed drivers (NVIDIA: [NVSlimmer](https://www.majorgeeks.com/mg/getmirror/nvslimmer,2.html), AMD: [RadeonSoftwareSlimmer](https://github.com/GSDragoon/RadeonSoftwareSlimmer))
 
 # How to run?
-Open **PowerShell** as **administrator**, then copy and paste the command below.
+Open **PowerShell** (not Windows Terminal) as **administrator**, then copy and paste the command below.
 ```
 irm "https://raw.githubusercontent.com/gyp1jsi/MakeWindowsGreatAgain/refs/heads/untested/MakeWindowsGreatAgain/mwga.ps1" | iex
+```
+# Restore
+To **restore** services and reinstall Microsoft Edge, 
+```
+irm "https://raw.githubusercontent.com/gyp1jsi/MakeWindowsGreatAgain/refs/heads/untested/MakeWindowsGreatAgain/restore.ps1" | iex
 ```
 ### Latest version: 2.1.0 - 01/09/2025
 
