@@ -311,28 +311,28 @@ function Uninstall-Apps {
         $PathToLMUninstallMSEdgeUpdate = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge Update"
         $PathToLMUninstallMSEdgeWebView = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView"
     
-        Write-Status -Types "+" -Status "Enabling uninstall button to Microsoft Edge..."
+        Write-Output -Types "+" -Status "Enabling uninstall button to Microsoft Edge..."
         Set-ItemProperty -Path "$PathToLMUninstallMSEdge", "$PathToLMUninstallMSEdgeUpdate", "$PathToLMUninstallMSEdgeWebView" -Name "NoRemove" -Type DWord -Value 0
     
-        Write-Status -Types "@" -Status "Stopping all 'msedge' processes before uninstalling..."
+        Write-Output -Types "@" -Status "Stopping all 'msedge' processes before uninstalling..."
         Get-Process -Name msedge | Stop-Process -PassThru -Force
     
         If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge\Application") {G
             ForEach ($FullName in (Get-ChildItem -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge*\Application\*\Installer\setup.exe").FullName) {
-                Write-Status -Types "@" -Status "Uninstalling MS Edge from $FullName..."
+                Write-Output -Types "@" -Status "Uninstalling MS Edge from $FullName..."
                 Start-Process -FilePath $FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait
             }
         } Else {
-            Write-Status -Types "?" -Status "Edge folder does not exist anymore..." -Warning
+            Write-Output -Types "?" -Status "Edge folder does not exist anymore..." -Warning
         }
     
         If (Test-Path -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore") {
             ForEach ($FullName in (Get-ChildItem -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore\*\Installer\setup.exe").FullName) {
-                Write-Status -Types "@" -Status "Uninstalling MS Edge from $FullName..."
+                Write-Output -Types "@" -Status "Uninstalling MS Edge from $FullName..."
                 Start-Process -FilePath $FullName -ArgumentList "--uninstall", "--system-level", "--verbose-logging", "--force-uninstall" -Wait
             }
         } Else {
-            Write-Status -Types "?" -Status "EdgeCore folder does not exist anymore..." -Warning
+            Write-Output -Types "?" -Status "EdgeCore folder does not exist anymore..." -Warning
         }
     
         $EdgeApps = @(
@@ -352,13 +352,13 @@ function Uninstall-Apps {
         Set-ScheduledTaskState -State Disabled -ScheduledTasks @("\MicrosoftEdgeUpdateTaskMachineCore", "\MicrosoftEdgeUpdateTaskMachineUA", "\MicrosoftEdgeUpdateTaskUser*")
         Set-ServiceStartup -State 'Disabled' -Services @("edgeupdate", "edgeupdatem", "MicrosoftEdgeElevationService")
     
-        Write-Status -Types "@" -Status "Preventing Edge from reinstalling..."
+        Write-Output -Types "@" -Status "Preventing Edge from reinstalling..."
         Set-ItemProperty -Path "$PathToLMEdgeUpdate" -Name "DoNotUpdateToEdgeWithChromium" -Type DWord -Value 1
     
-        Write-Status -Types "@" -Status "Deleting Edge appdata\local folders from current user..."
+        Write-Output -Types "@" -Status "Deleting Edge appdata\local folders from current user..."
         Remove-Item -Path "$env:LOCALAPPDATA\Packages\Microsoft.MicrosoftEdge*_*" -Recurse -Force | Out-Host
     
-        Write-Status -Types "@" -Status "Deleting Edge from $env:SystemDrive\Program Files (x86)\Microsoft\..."
+        Write-Output -Types "@" -Status "Deleting Edge from $env:SystemDrive\Program Files (x86)\Microsoft\..."
         Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\Edge" -Recurse -Force | Out-Host
         # Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeCore" -Recurse -Force | Out-Host
         Remove-Item -Path "$env:SystemDrive\Program Files (x86)\Microsoft\EdgeUpdate" -Recurse -Force | Out-Host
