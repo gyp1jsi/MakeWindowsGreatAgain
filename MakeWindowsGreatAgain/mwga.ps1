@@ -491,7 +491,10 @@ function Optimize-Privacy {
             )
 
         foreach ($task in $tasks) {
-            Disable-ScheduledTask -TaskPath "\" + ($task -replace "\\[^\\]+$", "\") -TaskName ($task -split "\\")[-1] -ErrorAction SilentlyContinue
+            $parts = $task -split '\\'
+            $taskPath = "\" + ($parts[0..($parts.Length - 2)] -join '\') + "\"
+            $taskName = $parts[-1]
+            Disable-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue
         }
                 Write-Output "Telemetry scheduled tasks have been disabled."
                  timeout /t 5222
