@@ -445,7 +445,7 @@ function Optimize-Privacy {
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Type DWord -Value 1
         
         Write-Output "Telemetry and data collection registry keys have been disabled."
-         
+         timeout /t 5222
         Optimize-Privacy
 
 
@@ -497,7 +497,6 @@ function Optimize-Privacy {
             Disable-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue
         }
                 Write-Output "Telemetry scheduled tasks have been disabled."
-                 timeout /t 5222
                 Optimize-Privacy
 
     }
