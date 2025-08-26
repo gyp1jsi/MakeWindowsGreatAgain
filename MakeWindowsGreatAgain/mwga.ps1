@@ -446,7 +446,7 @@ function Optimize-Privacy {
         
         Write-Output "Telemetry and data collection registry keys have been disabled."
          timeout /t 5222
-        Optimize-Privacy
+        #Optimize-Privacy
 
 
     }
