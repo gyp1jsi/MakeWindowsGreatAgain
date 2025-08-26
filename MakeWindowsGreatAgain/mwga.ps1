@@ -97,7 +97,7 @@ function Uninstall-Apps {
             Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $App | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
         }
         Write-Output "Xbox-related apps uninstalled."
-        
+
         Uninstall-Apps
     }
 
@@ -442,7 +442,6 @@ function Optimize-Privacy {
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "ClearPageFileAtShutdown" -Type DWord -Value 0
         Set-ItemProperty -Path "HKLM:\SYSTEM\ControlSet001\Services\Ndu" -Name "Start" -Type DWord -Value 2
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "IRPStackSize" -Type DWord -Value 30
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Feeds" -Name "ShellFeedsTaskbarViewMode" -Type DWord -Value 2
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Type DWord -Value 1
         
         Write-Output "Telemetry and data collection registry keys have been disabled."
@@ -495,7 +494,7 @@ function Optimize-Privacy {
             Disable-ScheduledTask -TaskPath "\" + ($task -replace "\\[^\\]+$", "\") -TaskName ($task -split "\\")[-1] -ErrorAction SilentlyContinue
         }
                 Write-Output "Telemetry scheduled tasks have been disabled."
-                 
+                 timeout /t 5222
                 Optimize-Privacy
 
     }
@@ -739,6 +738,8 @@ function Optimize-Services {
             Set-Service -Name $Service -StartupType Manual -ErrorAction SilentlyContinue
         }
 
+        Optimize-Services
+
     }
 
     function DisabledServices {
@@ -801,6 +802,8 @@ function Optimize-Services {
             Write-Verbose -Message ('Setting Service {0} to Disabled' -f $Service)
             Set-Service -Name $Service -StartupType Disabled -ErrorAction SilentlyContinue
         }
+
+        Optimize-Services
 
     }
 
