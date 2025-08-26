@@ -745,7 +745,9 @@ function Optimize-Services {
     }
 
     function DisabledServices {
-        mkdir C:\MakeWindowsGreatAgain\backup
+        if (-not (Test-Path "C:\MakeWindowsGreatAgain\backup")) {
+            mkdir "C:\MakeWindowsGreatAgain\backup"
+        }
         # Saves a copy of running services before running this part to be restored if needed
         $disabledServices = Get-Service | Where-Object { $_.StartType -eq "Disabled" } | Select-Object -ExpandProperty Name
         $DisOutput = "C:\MakeWindowsGreatAgain\backup\disserv.txt"
