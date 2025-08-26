@@ -445,8 +445,8 @@ function Optimize-Privacy {
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Type DWord -Value 1
         
         Write-Output "Telemetry and data collection registry keys have been disabled."
-         timeout /t 5222
-        #Optimize-Privacy
+
+        Optimize-Privacy
 
 
     }
