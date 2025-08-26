@@ -532,7 +532,9 @@ function Optimize-Privacy {
 function Optimize-Services {
 
     function ManualServices {
-        mkdir C:\MakeWindowsGreatAgain\backup    
+        if (-not (Test-Path "C:\MakeWindowsGreatAgain\backup")) {
+            mkdir "C:\MakeWindowsGreatAgain\backup"
+        }
         # Saves a copy of running services before running this part to be restored if needed
         # Get all services and filter by start type
         $automaticServices = Get-Service | Where-Object { $_.StartType -eq "Automatic" } | Select-Object -ExpandProperty Name
