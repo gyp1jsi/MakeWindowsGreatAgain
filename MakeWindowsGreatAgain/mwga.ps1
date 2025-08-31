@@ -366,8 +366,9 @@ function Remove-MSEdge() {
         'Cancel' {
             Write-Host "Aborting..." # With Yes, No and Cancel, the user can press Esc to exit
         }
+        }
         timeout /t 5222
-         
+        Write-Output "Microsoft Edge uninstalled."
         Uninstall-Apps
     }
 
